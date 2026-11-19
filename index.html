@@ -1,0 +1,3131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIKAD — Sistem Informasi Kader | DPW Wahdah Islamiyah Sulawesi Barat</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Supabase JS SDK v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+          },
+          colors: {
+            tealbrand: {
+              700: '#0f766e',
+              600: '#0d9488',
+              800: '#115e59',
+              900: '#134e4a'
+            },
+            sage: {
+              50: '#f4f7f5',
+              100: '#e6eee9',
+              200: '#cddcd3',
+              300: '#abc3b5',
+              400: '#84a98c',
+              500: '#7c9a82',
+              600: '#5f8575',
+              700: '#4a6b5d',
+              800: '#3b564b'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #f4f7f5;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Gradient Utama: Teal (#0f766e, #0d9488) & Sage Green (#5f8575, #7c9a82, #84a98c) */
+    .bg-teal-sage-gradient {
+      background: linear-gradient(135deg, #0f766e 0%, #4e7d71 55%, #7c9a82 100%);
+    }
+    .bg-teal-sage-gradient-hover:hover {
+      background: linear-gradient(135deg, #0d6962 0%, #436e63 55%, #6d8b73 100%);
+    }
+    .bg-sidebar-gradient {
+      background: linear-gradient(180deg, #0b4f4a 0%, #0f766e 38%, #4e7d71 78%, #5f8575 100%);
+    }
+    .bg-table-header-gradient {
+      background: linear-gradient(90deg, #0f766e 0%, #3f7368 62%, #5f8575 100%);
+    }
+    .bg-progress-gradient {
+      background: linear-gradient(90deg, #0f766e 0%, #0d9488 50%, #84a98c 100%);
+    }
+
+    /* Kustomisasi scrollbar halus bernuansa sage */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e6eee9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #84a98c;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5f8575;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7f5] text-slate-800 antialiased selection:bg-[#cddcd3] selection:text-[#0b4f4a]">
+
+  <!-- ======================================================================= -->
+  <!-- TOAST NOTIFICATION CONTAINER                                            -->
+  <!-- ======================================================================= -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-[80] flex flex-col gap-2 max-w-sm w-[calc(100vw-2rem)] pointer-events-none"></div>
+
+  <!-- ======================================================================= -->
+  <!-- LAYOUT UTAMA APLIKASI (SIDEBAR + KONTEN)                                -->
+  <!-- ======================================================================= -->
+  <div class="min-h-screen flex">
+
+    <!-- Backdrop Sidebar Mobile -->
+    <div id="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-30 hidden lg:hidden transition-opacity"></div>
+
+    <!-- SIDEBAR NAVIGASI (3 LAMAN UTAMA - TANPA HAK AKSES) -->
+    <aside id="app-sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-72 bg-sidebar-gradient text-white flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out shadow-xl lg:shadow-none shrink-0">
+
+      <!-- Bagian Atas: Identitas SIKAD & Menu -->
+      <div>
+        <!-- Brand Header -->
+        <div class="p-5 border-b border-white/15 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-xs flex items-center justify-center shadow-md border border-white/25 shrink-0">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h1 class="text-xl font-extrabold tracking-tight text-white">SIKAD</h1>
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/25">Sulbar</span>
+              </div>
+              <p class="text-[11px] text-teal-50/90 leading-snug mt-0.5">Sistem Informasi Kader — DPW Wahdah Islamiyah Sulawesi Barat</p>
+            </div>
+          </div>
+
+          <!-- Tombol Tutup Sidebar di Mobile -->
+          <button type="button" onclick="toggleMobileSidebar(false)" class="lg:hidden p-2 rounded-xl text-white/80 hover:bg-white/15 hover:text-white cursor-pointer" aria-label="Tutup Menu">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Menu Navigasi 3 Laman -->
+        <nav class="p-4 space-y-1.5" aria-label="Navigasi Utama">
+          <p class="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/65">Menu Utama</p>
+
+          <button type="button" id="nav-dashboard" onclick="navigateTo('dashboard')" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer bg-white/20 text-white shadow-sm border border-white/25">
+            <svg class="w-5 h-5 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10-3a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z" />
+            </svg>
+            <span>Dashboard Analitik</span>
+          </button>
+
+          <button type="button" id="nav-direktori" onclick="navigateTo('direktori')" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer text-white/80 hover:bg-white/10 hover:text-white border border-transparent">
+            <svg class="w-5 h-5 text-white/90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span>Direktori Kader</span>
+          </button>
+
+          <button type="button" id="nav-master" onclick="navigateTo('master')" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer text-white/80 hover:bg-white/10 hover:text-white border border-transparent">
+            <svg class="w-5 h-5 text-white/90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+            <span>Master Daurah & Pelatihan</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Bagian Bawah Sidebar: Pengaturan Dual-Sync & Reset -->
+      <div class="p-4 border-t border-white/15 space-y-2.5">
+        <div class="p-3 rounded-xl bg-black/15 border border-white/15 text-xs text-white/90 space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-white">
+            <span class="w-2 h-2 rounded-full bg-teal-300"></span>
+            <span>Arsitektur Dual-Sync</span>
+          </div>
+          <p class="text-[11px] text-white/75 leading-relaxed">Supabase Database Utama & Auto-Backup JSON ke GitHub.</p>
+        </div>
+
+        <button type="button" onclick="openGithubSettingsModal()" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-xs font-bold transition-all cursor-pointer">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Pengaturan Backup GitHub</span>
+        </button>
+
+        <button type="button" onclick="confirmResetSampleData()" class="w-full flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-black/20 hover:bg-rose-900/70 text-white/85 hover:text-white border border-white/15 hover:border-rose-400/50 text-xs font-semibold transition-all cursor-pointer">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Reset Data Contoh</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- KOLOM KONTEN UTAMA -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- TOP HEADER BAR + 2 INDIKATOR STATUS DUAL-SYNC -->
+      <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-[#d5e0d9] px-4 sm:px-6 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
+
+          <!-- Baris Kiri Header: Tombol Mobile + Judul Laman -->
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <button type="button" onclick="toggleMobileSidebar(true)" class="lg:hidden p-2.5 rounded-xl bg-[#e6eee9] hover:bg-[#cddcd3] text-[#0f766e] transition-colors cursor-pointer" aria-label="Buka Menu Navigasi">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 text-[11px] font-bold text-[#0f766e]">
+                  <span>SIKAD</span>
+                  <span class="text-[#abc3b5]">/</span>
+                  <span id="topbar-breadcrumb" class="text-[#5f8575] truncate">Dashboard Analitik</span>
+                </div>
+                <h2 id="topbar-title" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Dashboard Analitik Kader</h2>
+              </div>
+            </div>
+
+            <!-- Tombol Registrasi Cepat di Layar Kecil -->
+            <button type="button" onclick="openKaderFormModal()" class="xl:hidden inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white text-xs sm:text-sm font-bold shadow-sm transition-all cursor-pointer shrink-0">
+              <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span class="hidden sm:inline">Registrasi Kader</span>
+              <span class="sm:hidden">Tambah</span>
+            </button>
+          </div>
+
+          <!-- Baris Kanan Header: 2 Indikator Status (Supabase & Backup GitHub) + Tombol Restore & Registrasi -->
+          <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+
+            <!-- Indikator 1: Status Koneksi Supabase -->
+            <div id="status-supabase-badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold">
+              <span id="status-supabase-dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+              <span id="status-supabase-text">Supabase: Belum Dikonfigurasi</span>
+            </div>
+
+            <!-- Indikator 2: Waktu Terakhir Berhasil Backup ke GitHub -->
+            <button type="button" onclick="openGithubSettingsModal()" title="Klik untuk mengatur token & repository backup GitHub" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e6eee9] hover:bg-[#d5e3db] border border-[#bfd1c6] text-[#2f5245] text-[11px] font-bold transition-colors cursor-pointer">
+              <span id="status-github-dot" class="w-2 h-2 rounded-full bg-[#7c9a82] shrink-0"></span>
+              <span id="status-github-text">Backup GitHub: Belum diatur</span>
+            </button>
+
+            <!-- Tombol Pulihkan dari Backup GitHub -->
+            <button type="button" onclick="confirmRestoreFromGitHub()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#e6eee9] text-[#0f766e] border border-[#b8cdc1] text-xs font-bold shadow-2xs transition-colors cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-[#0f766e] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span>Pulihkan dari Backup GitHub</span>
+            </button>
+
+            <!-- Tombol Registrasi Kader Desktop -->
+            <button type="button" onclick="openKaderFormModal()" class="hidden xl:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white text-xs font-bold shadow-sm transition-all cursor-pointer">
+              <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Registrasi Kader</span>
+            </button>
+
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT AREA -->
+      <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6">
+        <div class="max-w-7xl mx-auto">
+
+          <!-- =============================================================== -->
+          <!-- LAMAN 1: DASHBOARD ANALITIK                                     -->
+          <!-- =============================================================== -->
+          <section id="page-dashboard" class="space-y-6">
+
+            <!-- 4 Kartu KPI Utama -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+
+              <!-- KPI 1: Total Seluruh Kader (Kartu Unggulan Gradient Teal & Sage) -->
+              <div class="bg-teal-sage-gradient text-white rounded-2xl p-5 shadow-md border border-[#5f8575]/40">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-white/85">Total Seluruh Kader</p>
+                    <p id="kpi-total-kader" class="text-3xl font-extrabold text-white mt-2 tabular-nums">0</p>
+                    <p id="kpi-gender-sub" class="text-xs text-white/85 mt-1.5">0 Ikhwan • 0 Akhwat</p>
+                  </div>
+                  <div class="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 text-white flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KPI 2: Total Kader Aktif -->
+              <div class="bg-white rounded-2xl p-5 border border-[#d5e0d9] shadow-xs hover:border-[#7c9a82] transition-colors">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-[#5f8575]">Total Kader Aktif</p>
+                    <div class="flex items-baseline gap-2.5 mt-2">
+                      <p id="kpi-kader-aktif" class="text-3xl font-extrabold text-[#0f766e] tabular-nums">0</p>
+                      <span id="kpi-kader-aktif-pct" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-extrabold bg-[#e6eee9] text-[#0f766e] border border-[#c5d7cd] tabular-nums">0%</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1.5">Aktif dalam pembinaan & dakwah</p>
+                  </div>
+                  <div class="w-11 h-11 rounded-2xl bg-[#e6eee9] border border-[#cddcd3] text-[#0f766e] flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KPI 3: Kader Kurang Aktif -->
+              <div class="bg-white rounded-2xl p-5 border border-[#d5e0d9] shadow-xs hover:border-amber-300 transition-colors">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-[#5f8575]">Kader Kurang Aktif</p>
+                    <div class="flex items-baseline gap-2.5 mt-2">
+                      <p id="kpi-kader-kurang-aktif" class="text-3xl font-extrabold text-amber-600 tabular-nums">0</p>
+                      <span id="kpi-kader-kurang-aktif-pct" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-extrabold bg-amber-50 text-amber-800 border border-amber-200 tabular-nums">0%</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1.5">Perlu pendampingan & konsolidasi</p>
+                  </div>
+                  <div class="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KPI 4: Total Daurah / Pelatihan Terdaftar -->
+              <div class="bg-white rounded-2xl p-5 border border-[#d5e0d9] shadow-xs hover:border-[#7c9a82] transition-colors">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-[#5f8575]">Total Daurah / Pelatihan</p>
+                    <p id="kpi-total-pelatihan" class="text-3xl font-extrabold text-[#3b564b] mt-2 tabular-nums">0</p>
+                    <p class="text-xs text-slate-500 mt-1.5">Program terdaftar di Master</p>
+                  </div>
+                  <div class="w-11 h-11 rounded-2xl bg-[#e6eee9] border border-[#cddcd3] text-[#4a6b5d] flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Baris Grafik 1: Sebaran Kader per DPD (6 DPD Sulbar) & 6 Jenjang Marhalah -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+              <!-- Grafik Batang & Ringkasan: Sebaran Total Kader per DPD -->
+              <div class="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-6 border border-[#d5e0d9] shadow-xs flex flex-col justify-between">
+                <div class="mb-4">
+                  <h3 class="text-base font-extrabold text-slate-900">Sebaran Total Kader per DPD</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">Distribusi kader pada 6 Dewan Pengurus Daerah (DPD) se-Sulawesi Barat</p>
+                </div>
+
+                <div class="relative h-64 w-full">
+                  <canvas id="chart-dpd"></canvas>
+                </div>
+
+                <!-- Ringkasan 6 DPD Sulawesi Barat -->
+                <div id="dpd-breakdown-list" class="mt-4 pt-3.5 border-t border-[#e6eee9] grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <!-- Diisi dinamis oleh JS -->
+                </div>
+              </div>
+
+              <!-- Grafik Donat & Rincian: Jumlah Kader Berdasarkan 6 Jenjang Marhalah -->
+              <div class="lg:col-span-5 bg-white rounded-2xl p-5 sm:p-6 border border-[#d5e0d9] shadow-xs flex flex-col justify-between">
+                <div class="mb-3">
+                  <h3 class="text-base font-extrabold text-slate-900">Kader Berdasarkan Jenjang Marhalah</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">Komposisi 6 jenjang marhalah kaderisasi</p>
+                </div>
+
+                <div class="relative h-48 w-full my-1">
+                  <canvas id="chart-marhalah"></canvas>
+                </div>
+
+                <!-- Rincian 6 Jenjang Marhalah -->
+                <div id="marhalah-breakdown-list" class="mt-4 pt-3.5 border-t border-[#e6eee9] grid grid-cols-2 gap-2">
+                  <!-- Diisi dinamis oleh JS -->
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Baris Grafik 2: Statistik Partisipasi Daurah & Pelatihan -->
+            <div class="bg-white rounded-2xl p-5 sm:p-6 border border-[#d5e0d9] shadow-xs space-y-5">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <h3 class="text-base font-extrabold text-slate-900">Statistik Partisipasi Daurah & Pelatihan</h3>
+                  <p class="text-xs text-slate-500 mt-0.5">Jumlah kader yang telah mengikuti masing-masing program daurah/pelatihan terdaftar di Master</p>
+                </div>
+                <button type="button" onclick="navigateTo('master')" class="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#e6eee9] hover:bg-[#d5e3db] text-[#0f766e] border border-[#bfd1c6] text-xs font-bold transition-colors cursor-pointer">
+                  <span>Kelola Master Pelatihan</span>
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <!-- Grafik Batang Horizontal -->
+                <div class="lg:col-span-7 relative h-72 w-full">
+                  <canvas id="chart-pelatihan"></canvas>
+                </div>
+
+                <!-- Daftar Progress Bar Partisipasi -->
+                <div id="pelatihan-progress-list" class="lg:col-span-5 space-y-3">
+                  <!-- Diisi dinamis oleh JS -->
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- =============================================================== -->
+          <!-- LAMAN 2: DIREKTORI KADER                                        -->
+          <!-- =============================================================== -->
+          <section id="page-direktori" class="hidden space-y-5">
+
+            <!-- Header & Tombol Aksi -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Direktori Kader Sulawesi Barat</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Klik tombol <strong class="text-[#0f766e]">Detail</strong> pada setiap baris kader untuk melihat biodata lengkap & riwayat daurah/pelatihan.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <button type="button" onclick="exportKaderCSV()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#e6eee9] text-[#2f5245] border border-[#b8cdc1] font-bold text-xs sm:text-sm shadow-2xs transition-colors cursor-pointer">
+                  <svg class="w-4 h-4 text-[#0f766e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Ekspor CSV</span>
+                </button>
+                <button type="button" onclick="openKaderFormModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white font-bold text-xs sm:text-sm shadow-sm transition-colors cursor-pointer">
+                  <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>+ Tambah Kader Baru</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Bar Pencarian & Filter -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#d5e0d9] shadow-xs space-y-3.5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
+
+                <!-- Input Pencarian -->
+                <div class="sm:col-span-2 lg:col-span-4 relative">
+                  <svg class="w-4 h-4 text-[#7c9a82] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input type="text" id="search-kader" oninput="renderDirektoriTable()" placeholder="Cari nama, no. induk, WA, atau profesi..." class="w-full pl-10 pr-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-[#0f766e] transition-all" />
+                </div>
+
+                <!-- Filter DPD -->
+                <div class="lg:col-span-2">
+                  <select id="filter-dpd" onchange="renderDirektoriTable()" class="w-full px-3 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                    <option value="ALL">Semua DPD (6 Kab.)</option>
+                    <option value="DPD Mamuju">DPD Mamuju</option>
+                    <option value="DPD Majene">DPD Majene</option>
+                    <option value="DPD Polewali Mandar">DPD Polewali Mandar</option>
+                    <option value="DPD Mamasa">DPD Mamasa</option>
+                    <option value="DPD Pasangkayu">DPD Pasangkayu</option>
+                    <option value="DPD Mamuju Tengah">DPD Mamuju Tengah</option>
+                  </select>
+                </div>
+
+                <!-- Filter Jenjang Marhalah -->
+                <div class="lg:col-span-2">
+                  <select id="filter-marhalah" onchange="renderDirektoriTable()" class="w-full px-3 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                    <option value="ALL">Semua Marhalah</option>
+                    <option value="Pra-Ta'rif">Pra-Ta'rif (PT)</option>
+                    <option value="Ta'rif 1">Ta'rif 1 (T1)</option>
+                    <option value="Ta'rif 2">Ta'rif 2 (T2)</option>
+                    <option value="Takwin 1">Takwin 1 (TK1)</option>
+                    <option value="Takwin 2">Takwin 2 (TK2)</option>
+                    <option value="Tanfidz">Tanfidz (TF)</option>
+                  </select>
+                </div>
+
+                <!-- Filter Jenis Kelamin -->
+                <div class="lg:col-span-2">
+                  <select id="filter-gender" onchange="renderDirektoriTable()" class="w-full px-3 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                    <option value="ALL">Ikhwan & Akhwat</option>
+                    <option value="Ikhwan">Ikhwan</option>
+                    <option value="Akhwat">Akhwat</option>
+                  </select>
+                </div>
+
+                <!-- Filter Status -->
+                <div class="lg:col-span-2">
+                  <select id="filter-status" onchange="renderDirektoriTable()" class="w-full px-3 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                    <option value="ALL">Semua Status</option>
+                    <option value="Aktif">Aktif</option>
+                    <option value="Kurang Aktif">Kurang Aktif</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs text-slate-500">
+                <span>Menampilkan <strong id="dir-shown-count" class="text-slate-900">0</strong> dari <strong id="dir-total-count" class="text-slate-900">0</strong> kader terdaftar</span>
+                <button type="button" onclick="resetDirektoriFilter()" class="text-[#0f766e] hover:text-[#0b4f4a] font-bold underline cursor-pointer">
+                  Reset Pencarian & Filter
+                </button>
+              </div>
+            </div>
+
+            <!-- Tabel Direktori Kader (RINGKAS — TANPA KOLOM RIWAYAT PELATIHAN) -->
+            <div class="bg-white rounded-2xl border border-[#d5e0d9] shadow-xs overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-table-header-gradient text-white text-[11px] font-bold uppercase tracking-wider">
+                      <th class="py-3.5 px-4 whitespace-nowrap">No. Induk Kader</th>
+                      <th class="py-3.5 px-4">Nama Lengkap & Jenis Kelamin</th>
+                      <th class="py-3.5 px-4">DPD / DPC Domisili</th>
+                      <th class="py-3.5 px-4 whitespace-nowrap">Jenjang Marhalah</th>
+                      <th class="py-3.5 px-4 whitespace-nowrap">No. WhatsApp</th>
+                      <th class="py-3.5 px-4 whitespace-nowrap">Status</th>
+                      <th class="py-3.5 px-4 text-right whitespace-nowrap">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="kader-tbody" class="divide-y divide-[#e6eee9] text-sm">
+                    <!-- Diisi dinamis oleh JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- State Kosong Jika Filter Tidak Menemukan Data -->
+              <div id="kader-empty-state" class="hidden py-12 px-4 text-center space-y-2">
+                <p class="text-sm font-bold text-slate-700">Tidak ada data kader yang sesuai filter.</p>
+                <p class="text-xs text-slate-500">Coba ubah kata kunci pencarian atau klik Reset Pencarian & Filter.</p>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- =============================================================== -->
+          <!-- LAMAN 3: MASTER DAURAH & PELATIHAN                              -->
+          <!-- =============================================================== -->
+          <section id="page-master" class="hidden space-y-5">
+
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Master Daurah & Pelatihan</h2>
+              <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Kelola daftar resmi program daurah dan pelatihan kader. Setiap program otomatis muncul pada formulir kader dan modal detail profil.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+              <!-- Form Tambah / Edit Daurah & Pelatihan (HANYA 2 INPUT: KODE & NAMA) -->
+              <div class="lg:col-span-4 bg-white rounded-2xl p-5 sm:p-6 border border-[#d5e0d9] shadow-xs">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#e6eee9]">
+                  <h3 id="master-form-heading" class="text-base font-extrabold text-slate-900">Tambah Pelatihan Baru</h3>
+                  <button type="button" id="btn-cancel-master-edit" onclick="resetMasterForm()" class="hidden text-xs font-bold text-[#5f8575] hover:text-slate-800 underline cursor-pointer">
+                    Batal Edit
+                  </button>
+                </div>
+
+                <form id="form-master" onsubmit="handleMasterSubmit(event)" class="space-y-4">
+                  <input type="hidden" id="master-edit-id" value="" />
+
+                  <div>
+                    <label for="master-kode" class="block text-xs font-bold text-slate-700 mb-1.5">Kode Pelatihan <span class="text-rose-500">*</span></label>
+                    <input type="text" id="master-kode" required maxlength="20" placeholder="Contoh: DM-01" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-mono uppercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-[#0f766e]" />
+                  </div>
+
+                  <div>
+                    <label for="master-nama" class="block text-xs font-bold text-slate-700 mb-1.5">Nama Daurah / Pelatihan <span class="text-rose-500">*</span></label>
+                    <input type="text" id="master-nama" required placeholder="Contoh: Daurah Marhalah Ta'rifiyah" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-[#0f766e]" />
+                  </div>
+
+                  <button type="submit" id="btn-submit-master" class="w-full py-2.5 px-4 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white font-bold text-sm shadow-sm inline-flex items-center justify-center gap-2 transition-colors cursor-pointer">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Simpan ke Daftar Master</span>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Tabel Daftar Daurah & Pelatihan -->
+              <div class="lg:col-span-8 bg-white rounded-2xl border border-[#d5e0d9] shadow-xs overflow-hidden">
+                <div class="px-5 py-4 border-b border-[#e6eee9] flex items-center justify-between gap-2">
+                  <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Daftar Daurah & Pelatihan Terdaftar</h3>
+                    <p class="text-xs text-slate-500">Total <strong id="master-total-badge" class="text-slate-800">0</strong> program terdaftar</p>
+                  </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="bg-table-header-gradient text-white text-[11px] font-bold uppercase tracking-wider">
+                        <th class="py-3.5 px-4 whitespace-nowrap">Kode Pelatihan</th>
+                        <th class="py-3.5 px-4">Nama Daurah / Pelatihan</th>
+                        <th class="py-3.5 px-4 text-center whitespace-nowrap">Jumlah Kader Peserta</th>
+                        <th class="py-3.5 px-4 text-right whitespace-nowrap">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="master-tbody" class="divide-y divide-[#e6eee9] text-sm">
+                      <!-- Diisi dinamis oleh JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 1: DETAIL PROFIL KADER & RIWAYAT DAURAH/PELATIHAN                 -->
+  <!-- ======================================================================= -->
+  <div id="modal-detail" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="detail-nama">
+    <div class="min-h-screen px-4 py-6 flex items-center justify-center">
+      <div onclick="closeDetailModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+
+      <div class="relative bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-[#d5e0d9] overflow-hidden z-10">
+
+        <!-- Header Modal Detail (Gradient Teal & Sage) -->
+        <div class="bg-teal-sage-gradient px-6 py-5 text-white flex items-start justify-between gap-4">
+          <div class="space-y-1.5 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="detail-id-kader" class="font-mono text-xs font-extrabold px-2.5 py-0.5 rounded-md bg-white/20 text-white border border-white/30">WI-TF-0001</span>
+              <span id="detail-gender" class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-white/15 text-white">Ikhwan</span>
+              <span id="detail-status" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/30">Aktif</span>
+            </div>
+            <h3 id="detail-nama" class="text-lg sm:text-xl font-extrabold tracking-tight text-white">Nama Lengkap Kader</h3>
+            <p id="detail-profesi-header" class="text-xs text-white/85">Profesi / Keahlian</p>
+          </div>
+
+          <button type="button" onclick="closeDetailModal()" class="p-2 rounded-xl text-white/80 hover:bg-white/15 hover:text-white transition-colors cursor-pointer shrink-0" aria-label="Tutup Detail">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Body Modal Detail -->
+        <div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+
+          <!-- Informasi Biodata Lengkap -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-sm">
+            <div class="p-3.5 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9]">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#5f8575] block">Tempat & Tanggal Lahir</span>
+              <span id="detail-ttl" class="font-semibold text-slate-900 mt-0.5 block">-</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9]">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#5f8575] block">Jenjang Marhalah</span>
+              <span id="detail-marhalah" class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-extrabold bg-teal-sage-gradient text-white mt-1">-</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9]">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#5f8575] block">DPD & DPC Domisili</span>
+              <span id="detail-dpd-dpc" class="font-bold text-slate-900 mt-0.5 block">-</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9]">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#5f8575] block">Profesi / Keahlian</span>
+              <span id="detail-profesi" class="font-semibold text-slate-800 mt-0.5 block">-</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9] sm:col-span-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#5f8575] block">Alamat Domisili</span>
+              <span id="detail-alamat" class="font-semibold text-slate-800 mt-0.5 block">-</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9] sm:col-span-2 flex items-center justify-between gap-3">
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-[#5f8575] block">Nomor WhatsApp</span>
+                <span id="detail-wa" class="font-mono font-bold text-slate-900 mt-0.5 block">-</span>
+              </div>
+              <a id="detail-wa-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white text-xs font-bold shadow-2xs transition-colors shrink-0">
+                <span>Hubungi WA</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Bagian Khusus: Riwayat Daurah & Pelatihan (PENGECUALIAN KHUSUS: HIJAU TERANG + ✓ UNTUK SUDAH DIIKUTI, POLOS TANPA WARNA UNTUK BELUM DIIKUTI) -->
+          <div class="pt-4 border-t border-[#d5e0d9] space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#0f766e]">Riwayat Daurah & Pelatihan</h4>
+                <p id="detail-pelatihan-summary" class="text-xs text-slate-500 mt-0.5">0 dari 0 program pelatihan telah diikuti</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 text-[11px]">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-400 font-bold">✓ Sudah Diikuti</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-white text-slate-400 border border-slate-200">Belum Diikuti</span>
+              </div>
+            </div>
+
+            <div id="detail-pelatihan-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-4 rounded-xl bg-[#f4f7f5]/80 border border-[#d5e0d9]">
+              <!-- Diisi dinamis: hijau terang + ✓ untuk sudah diikuti, polos tanpa warna untuk belum diikuti -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer Modal Detail -->
+        <div class="px-6 py-4 bg-[#f4f7f5] border-t border-[#d5e0d9] flex items-center justify-between gap-3">
+          <button type="button" onclick="closeDetailModal()" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-[#cddcd3] font-bold text-xs sm:text-sm transition-colors cursor-pointer">
+            Tutup
+          </button>
+          <button type="button" id="detail-btn-edit" class="px-5 py-2.5 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white font-bold text-xs sm:text-sm shadow-sm transition-colors cursor-pointer">
+            Edit Data & Pelatihan
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 2: FORM REGISTRASI / EDIT KADER                                   -->
+  <!-- ======================================================================= -->
+  <div id="modal-kader-form" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="form-kader-title">
+    <div class="min-h-screen px-4 py-6 flex items-center justify-center">
+      <div onclick="closeKaderFormModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+
+      <div class="relative bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-[#d5e0d9] overflow-hidden z-10">
+
+        <!-- Header Modal Form -->
+        <div class="bg-teal-sage-gradient px-6 py-4 text-white flex items-center justify-between gap-3">
+          <div>
+            <h3 id="form-kader-title" class="text-base sm:text-lg font-extrabold">Registrasi Kader Baru — SIKAD</h3>
+            <p class="text-xs text-white/85">Lengkapi biodata kader dan centang pelatihan yang telah diikuti</p>
+          </div>
+          <button type="button" onclick="closeKaderFormModal()" class="p-2 rounded-xl text-white/80 hover:bg-white/15 hover:text-white cursor-pointer" aria-label="Tutup Form">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Form Body -->
+        <form id="form-kader" onsubmit="handleKaderFormSubmit(event)" class="p-6 space-y-5 max-h-[82vh] overflow-y-auto">
+          <input type="hidden" id="kader-edit-seq" value="" />
+
+          <!-- Live Preview Nomor Induk Kader Otomatis -->
+          <div class="p-4 rounded-xl bg-[#e6eee9] border border-[#b8cdc1] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#0f766e]">Pratinjau Nomor Induk Kader (Otomatis)</span>
+              <p class="text-xs text-slate-600 mt-0.5">Format: <code class="font-mono font-bold text-[#0b4f4a]">WI-(kode marhalah)-(4 digit urut)</code></p>
+            </div>
+            <div id="live-id-preview" class="font-mono text-lg sm:text-xl font-extrabold text-[#0f766e] bg-white px-4 py-1.5 rounded-xl border border-[#9eb9aa] shadow-2xs self-start sm:self-auto">
+              WI-PT-0019
+            </div>
+          </div>
+
+          <!-- Kotak Peringatan Anti-Duplikasi WhatsApp -->
+          <div id="wa-duplicate-box" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-900 text-xs space-y-1">
+            <p class="font-extrabold">Penyimpanan Ditolak — Nomor WhatsApp Ganda!</p>
+            <p id="wa-duplicate-text">Nomor WhatsApp ini sudah digunakan oleh kader lain.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <!-- Nama Lengkap -->
+            <div>
+              <label for="input-nama" class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
+              <input type="text" id="input-nama" required placeholder="Contoh: Ust. Ahmad Fauzan, Lc." class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+            </div>
+
+            <!-- Jenis Kelamin -->
+            <div>
+              <label for="input-gender" class="block text-xs font-bold text-slate-700 mb-1">Jenis Kelamin <span class="text-rose-500">*</span></label>
+              <select id="input-gender" required class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                <option value="Ikhwan">Ikhwan</option>
+                <option value="Akhwat">Akhwat</option>
+              </select>
+            </div>
+
+            <!-- Tempat Lahir -->
+            <div>
+              <label for="input-tempat-lahir" class="block text-xs font-bold text-slate-700 mb-1">Tempat Lahir <span class="text-rose-500">*</span></label>
+              <input type="text" id="input-tempat-lahir" required placeholder="Contoh: Mamuju" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+            </div>
+
+            <!-- Tanggal Lahir -->
+            <div>
+              <label for="input-tanggal-lahir" class="block text-xs font-bold text-slate-700 mb-1">Tanggal Lahir <span class="text-rose-500">*</span></label>
+              <input type="date" id="input-tanggal-lahir" required class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+            </div>
+
+            <!-- Nomor WhatsApp (Anti-Duplikasi) -->
+            <div class="sm:col-span-2">
+              <label for="input-wa" class="block text-xs font-bold text-slate-700 mb-1">No. WhatsApp Aktif (Anti-Duplikasi) <span class="text-rose-500">*</span></label>
+              <input type="tel" id="input-wa" required oninput="validateWhatsAppLive()" placeholder="Contoh: 081242889900 atau +6281242889900" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+              <p id="wa-helper-text" class="text-[11px] text-slate-500 mt-1">Format 08..., 628..., atau +628... dinormalisasi otomatis untuk mencegah data ganda.</p>
+            </div>
+
+            <!-- DPD Domisili -->
+            <div>
+              <label for="input-dpd" class="block text-xs font-bold text-slate-700 mb-1">DPD Domisili <span class="text-rose-500">*</span></label>
+              <select id="input-dpd" required class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                <option value="DPD Mamuju">DPD Mamuju</option>
+                <option value="DPD Majene">DPD Majene</option>
+                <option value="DPD Polewali Mandar">DPD Polewali Mandar</option>
+                <option value="DPD Mamasa">DPD Mamasa</option>
+                <option value="DPD Pasangkayu">DPD Pasangkayu</option>
+                <option value="DPD Mamuju Tengah">DPD Mamuju Tengah</option>
+              </select>
+            </div>
+
+            <!-- DPC Domisili (Kecamatan) -->
+            <div>
+              <label for="input-dpc" class="block text-xs font-bold text-slate-700 mb-1">DPC Domisili (Kecamatan) <span class="text-rose-500">*</span></label>
+              <input type="text" id="input-dpc" required placeholder="Contoh: DPC Simboro" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+            </div>
+
+            <!-- Alamat Domisili -->
+            <div class="sm:col-span-2">
+              <label for="input-alamat" class="block text-xs font-bold text-slate-700 mb-1">Alamat Domisili <span class="text-rose-500">*</span></label>
+              <input type="text" id="input-alamat" required placeholder="Contoh: Jl. Soekarno Hatta No. 14, Kel. Rangas" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+            </div>
+
+            <!-- Jenjang Marhalah (PT, T1, T2, TK1, TK2, TF) -->
+            <div>
+              <label for="input-marhalah" class="block text-xs font-bold text-slate-700 mb-1">Jenjang Marhalah <span class="text-rose-500">*</span></label>
+              <select id="input-marhalah" onchange="updateLiveIdPreview()" required class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-semibold text-[#0b4f4a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                <option value="Pra-Ta'rif">Pra-Ta'rif (Kode: PT)</option>
+                <option value="Ta'rif 1">Ta'rif 1 (Kode: T1)</option>
+                <option value="Ta'rif 2">Ta'rif 2 (Kode: T2)</option>
+                <option value="Takwin 1">Takwin 1 (Kode: TK1)</option>
+                <option value="Takwin 2">Takwin 2 (Kode: TK2)</option>
+                <option value="Tanfidz">Tanfidz (Kode: TF)</option>
+              </select>
+            </div>
+
+            <!-- Status Kader -->
+            <div>
+              <label for="input-status" class="block text-xs font-bold text-slate-700 mb-1">Status Kader <span class="text-rose-500">*</span></label>
+              <select id="input-status" required class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                <option value="Aktif">Aktif</option>
+                <option value="Kurang Aktif">Kurang Aktif</option>
+              </select>
+            </div>
+
+            <!-- Profesi / Keahlian -->
+            <div class="sm:col-span-2">
+              <label for="input-profesi" class="block text-xs font-bold text-slate-700 mb-1">Profesi / Keahlian <span class="text-rose-500">*</span></label>
+              <input type="text" id="input-profesi" required placeholder="Contoh: Guru, Dokter, ASN, Pengusaha, IT, Dai" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+            </div>
+
+          </div>
+
+          <!-- Checkbox Riwayat Daurah & Pelatihan (Dinamis dari Master) -->
+          <div class="pt-4 border-t border-[#d5e0d9] space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <label class="block text-xs font-extrabold uppercase tracking-wider text-[#0f766e]">
+                Riwayat Daurah & Pelatihan yang Telah Diikuti
+              </label>
+              <div class="flex items-center gap-2 text-[11px]">
+                <button type="button" onclick="toggleAllPelatihanCheckboxes(true)" class="text-[#0f766e] hover:text-[#0b4f4a] font-bold underline cursor-pointer">Centang Semua</button>
+                <span class="text-slate-300">|</span>
+                <button type="button" onclick="toggleAllPelatihanCheckboxes(false)" class="text-slate-500 hover:text-slate-800 font-semibold underline cursor-pointer">Kosongkan</button>
+              </div>
+            </div>
+
+            <div id="form-pelatihan-checkboxes" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <!-- Diisi dinamis oleh JS dari Master Pelatihan -->
+            </div>
+          </div>
+
+          <!-- Footer Modal Form -->
+          <div class="pt-4 border-t border-[#d5e0d9] flex items-center justify-end gap-3">
+            <button type="button" onclick="closeKaderFormModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors cursor-pointer">
+              Batal
+            </button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white font-bold text-sm shadow-sm transition-colors cursor-pointer">
+              Simpan Data Kader
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 3: PENGATURAN BACKUP GITHUB & PANDUAN SQL SUPABASE                -->
+  <!-- ======================================================================= -->
+  <div id="modal-github-settings" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="github-modal-title">
+    <div class="min-h-screen px-4 py-6 flex items-center justify-center">
+      <div onclick="closeGithubSettingsModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+
+      <div class="relative bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-[#d5e0d9] overflow-hidden z-10">
+
+        <!-- Header Modal -->
+        <div class="bg-teal-sage-gradient px-6 py-4 text-white flex items-center justify-between gap-3">
+          <div>
+            <h3 id="github-modal-title" class="text-base sm:text-lg font-extrabold">Pengaturan Backup GitHub & Dual-Sync</h3>
+            <p class="text-xs text-white/85">Konfigurasi auto-backup file <code class="font-mono font-bold">backup.json</code> ke repositori GitHub Anda</p>
+          </div>
+          <button type="button" onclick="closeGithubSettingsModal()" class="p-2 rounded-xl text-white/80 hover:bg-white/15 hover:text-white cursor-pointer" aria-label="Tutup Pengaturan">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Body Modal -->
+        <div class="p-6 space-y-5 max-h-[82vh] overflow-y-auto">
+
+          <form id="form-github-settings" onsubmit="handleSaveGithubSettings(event)" class="space-y-4">
+
+            <!-- Input GitHub Backup Token -->
+            <div>
+              <label for="gh-token" class="block text-xs font-bold text-slate-700 mb-1">GitHub Backup Token (Personal Access Token)</label>
+              <div class="relative">
+                <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" class="w-full pl-3.5 pr-20 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+                <button type="button" onclick="toggleGithubTokenVisibility()" id="btn-toggle-gh-token" class="absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-white hover:bg-[#e6eee9] border border-[#cddcd3] text-[11px] font-bold text-[#0f766e] cursor-pointer">
+                  Tampilkan
+                </button>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">Token disimpan secara aman hanya di <code class="font-mono">localStorage</code> browser Anda dan tidak pernah ditulis di dalam kode sumber.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Input Username GitHub -->
+              <div>
+                <label for="gh-username" class="block text-xs font-bold text-slate-700 mb-1">Username GitHub</label>
+                <input type="text" id="gh-username" oninput="updateGithubEndpointPreview()" placeholder="[USERNAME_GITHUB]" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+              </div>
+
+              <!-- Input Nama Repository -->
+              <div>
+                <label for="gh-repo" class="block text-xs font-bold text-slate-700 mb-1">Nama Repository</label>
+                <input type="text" id="gh-repo" oninput="updateGithubEndpointPreview()" placeholder="[NAMA_REPO]" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+              </div>
+            </div>
+
+            <!-- Pratinjau Endpoint Dinamis -->
+            <div class="p-3.5 rounded-xl bg-[#e6eee9] border border-[#b8cdc1] space-y-1">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#0f766e] block">Pratinjau Endpoint GitHub REST API</span>
+              <code id="gh-endpoint-preview" class="text-xs font-mono text-[#0b4f4a] break-all block">https://api.github.com/repos/[USERNAME_GITHUB]/[NAMA_REPO]/contents/backup.json</code>
+            </div>
+
+            <!-- Tombol Simpan & Pulihkan -->
+            <div class="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+              <button type="button" onclick="confirmRestoreFromGitHub()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white hover:bg-[#e6eee9] text-[#0f766e] border border-[#b8cdc1] text-xs font-bold transition-colors cursor-pointer">
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span>Pulihkan dari Backup GitHub</span>
+              </button>
+
+              <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white text-xs sm:text-sm font-bold shadow-sm transition-colors cursor-pointer">
+                <span>Simpan Pengaturan GitHub</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Panduan Singkat + Salin SQL Tabel Supabase "data_utama" -->
+          <div class="pt-4 border-t border-[#d5e0d9] space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#0f766e]">Skema Tabel Supabase ("data_utama")</h4>
+                <p class="text-[11px] text-slate-500">Jalankan SQL berikut pada SQL Editor proyek Supabase Anda, lalu isi <code class="font-mono">SUPABASE_URL</code> & <code class="font-mono">SUPABASE_ANON_KEY</code> di bagian atas skrip.</p>
+              </div>
+              <button type="button" onclick="copySupabaseSqlSnippet()" class="px-3 py-1.5 rounded-lg bg-[#e6eee9] hover:bg-[#d5e3db] text-[#0f766e] border border-[#b8cdc1] text-xs font-bold shrink-0 cursor-pointer">
+                Salin SQL
+              </button>
+            </div>
+
+            <pre id="supabase-sql-snippet" class="p-3.5 rounded-xl bg-slate-900 text-teal-200 text-[11px] font-mono overflow-x-auto leading-relaxed">CREATE TABLE IF NOT EXISTS public.data_utama (
+  id TEXT PRIMARY KEY,
+  tipe_data TEXT NOT NULL CHECK (tipe_data IN ('kader', 'pelatihan')),
+  payload JSONB NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.data_utama ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
+  FOR ALL USING (true) WITH CHECK (true);</pre>
+          </div>
+
+        </div>
+
+        <!-- Footer Modal -->
+        <div class="px-6 py-3.5 bg-[#f4f7f5] border-t border-[#d5e0d9] flex justify-end">
+          <button type="button" onclick="closeGithubSettingsModal()" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-[#cddcd3] text-xs sm:text-sm font-bold cursor-pointer">
+            Tutup
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 4: KONFIRMASI CUSTOM (PENGGANTI confirm() & alert())              -->
+  <!-- ======================================================================= -->
+  <div id="modal-confirm" class="fixed inset-0 z-[70] hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="min-h-screen px-4 flex items-center justify-center">
+      <div onclick="closeConfirmModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+
+      <div class="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#d5e0d9] z-10 space-y-4">
+        <div class="space-y-1.5">
+          <h3 id="confirm-title" class="text-base font-extrabold text-slate-900">Konfirmasi Tindakan</h3>
+          <p id="confirm-message" class="text-xs sm:text-sm text-slate-600 leading-relaxed">Apakah Anda yakin ingin melanjutkan?</p>
+        </div>
+
+        <div class="pt-3 border-t border-[#e6eee9] flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold cursor-pointer">
+            Batal
+          </button>
+          <button type="button" id="confirm-execute-btn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer">
+            Ya, Lanjutkan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- JAVASCRIPT UTAMA SIKAD (DUAL-SYNC: SUPABASE + GITHUB REST API)          -->
+  <!-- ======================================================================= -->
+  <script>
+    // =========================================================================
+    // 1. KONFIGURASI SUPABASE & KONSTANTA STORAGE
+    // =========================================================================
+    const SUPABASE_URL = "[TEMPEL_PROJECT_URL]";
+    const SUPABASE_ANON_KEY = "[TEMPEL_ANON_KEY]";
+    const SUPABASE_TABLE = "data_utama";
+
+    const STORAGE_KEYS = {
+      KADER_FALLBACK: 'sikad_sulbar_fallback_kader',
+      PELATIHAN_FALLBACK: 'sikad_sulbar_fallback_pelatihan',
+      GH_TOKEN: 'sikad_github_backup_token',
+      GH_USERNAME: 'sikad_github_username',
+      GH_REPO: 'sikad_github_repo',
+      GH_LAST_BACKUP: 'sikad_github_last_backup_ts'
+    };
+
+    const DPD_LIST = [
+      'DPD Mamuju',
+      'DPD Majene',
+      'DPD Polewali Mandar',
+      'DPD Mamasa',
+      'DPD Pasangkayu',
+      'DPD Mamuju Tengah'
+    ];
+
+    // Kode Marhalah sesuai aturan: PT, T1, T2, TK1, TK2, TF
+    const MARHALAH_LIST = [
+      { label: "Pra-Ta'rif", code: 'PT', color: '#84a98c' },
+      { label: "Ta'rif 1", code: 'T1', color: '#7c9a82' },
+      { label: "Ta'rif 2", code: 'T2', color: '#5f8575' },
+      { label: 'Takwin 1', code: 'TK1', color: '#14b8a6' },
+      { label: 'Takwin 2', code: 'TK2', color: '#0d9488' },
+      { label: 'Tanfidz', code: 'TF', color: '#0f766e' }
+    ];
+
+    // =========================================================================
+    // 2. DATA CONTOH BAWAAN (6 MASTER PELATIHAN & 18 KADER SULAWESI BARAT)
+    // =========================================================================
+    const DEFAULT_PELATIHAN = [
+      { id: 'PLT-01', kode: 'DT-01', nama: "Daurah Marhalah Ta'rifiyah" },
+      { id: 'PLT-02', kode: 'DM-01', nama: 'Daurah Marhalah Takwiniyah' },
+      { id: 'PLT-03', kode: 'PMD-01', nama: 'Pelatihan Murabbi Dasar' },
+      { id: 'PLT-04', kode: 'DPH-01', nama: 'Daurah Pengelolaan Halaqah' },
+      { id: 'PLT-05', kode: 'PDK-01', nama: 'Pelatihan Dai & Khotib' },
+      { id: 'PLT-06', kode: 'MOK-01', nama: 'Manajemen Organisasi & Kepemimpinan' }
+    ];
+
+    const DEFAULT_KADER = [
+      {
+        reg_seq: 1,
+        id_kader: 'WI-TF-0001',
+        nama_lengkap: "Ust. H. Muhammad Ridwan, Lc., M.Ag.",
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Mamuju',
+        tanggal_lahir: '1983-04-12',
+        no_whatsapp: '081242110001',
+        dpd: 'DPD Mamuju',
+        dpc: 'DPC Simboro',
+        alamat: 'Jl. Andi Makkasau No. 18, Kel. Rangas',
+        profesi: "Dai & Dosen Ilmu Al-Qur'an",
+        marhalah: 'Tanfidz',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03', 'PLT-04', 'PLT-05', 'PLT-06']
+      },
+      {
+        reg_seq: 2,
+        id_kader: 'WI-TF-0002',
+        nama_lengkap: 'Ustadzah Hj. St. Aisyah Nurdin, S.Pd.I., M.Pd.',
+        jenis_kelamin: 'Akhwat',
+        tempat_lahir: 'Majene',
+        tanggal_lahir: '1986-09-21',
+        no_whatsapp: '081355220002',
+        dpd: 'DPD Mamuju',
+        dpc: 'DPC Mamuju',
+        alamat: 'Jl. Abd. Malik Pattana Endeng, Kel. Binanga',
+        profesi: 'Kepala Sekolah & Trainer Parenting',
+        marhalah: 'Tanfidz',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03', 'PLT-04', 'PLT-06']
+      },
+      {
+        reg_seq: 3,
+        id_kader: 'WI-TF-0003',
+        nama_lengkap: 'Ust. Abdurrahman Baharuddin, S.Pd.I.',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Polewali',
+        tanggal_lahir: '1985-01-17',
+        no_whatsapp: '081342440003',
+        dpd: 'DPD Polewali Mandar',
+        dpc: 'DPC Polewali',
+        alamat: 'Jl. Mr. Muh. Yamin No. 45, Kel. Pekkabata',
+        profesi: 'Dai & Pengasuh Pondok Tahfidz',
+        marhalah: 'Tanfidz',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03', 'PLT-04', 'PLT-05', 'PLT-06']
+      },
+      {
+        reg_seq: 4,
+        id_kader: 'WI-TF-0004',
+        nama_lengkap: 'Ust. Dr. Syamsul Bahri, M.Pd.I.',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Majene',
+        tanggal_lahir: '1981-11-05',
+        no_whatsapp: '081241770004',
+        dpd: 'DPD Majene',
+        dpc: 'DPC Banggae',
+        alamat: 'Jl. Jenderal Sudirman No. 22, Kel. Baru',
+        profesi: 'Dosen Perguruan Tinggi & Muballigh',
+        marhalah: 'Tanfidz',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03', 'PLT-04', 'PLT-05', 'PLT-06']
+      },
+      {
+        reg_seq: 5,
+        id_kader: 'WI-TK2-0005',
+        nama_lengkap: 'dr. Andi Farhan Syarifuddin',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Makassar',
+        tanggal_lahir: '1990-06-14',
+        no_whatsapp: '085242330005',
+        dpd: 'DPD Mamuju',
+        dpc: 'DPC Kalukku',
+        alamat: 'Perum Griya Kalukku Asri Blok B4, Kel. Bebanga',
+        profesi: 'Dokter Umum & Relawan Medis',
+        marhalah: 'Takwin 2',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03', 'PLT-04', 'PLT-06']
+      },
+      {
+        reg_seq: 6,
+        id_kader: 'WI-TK2-0006',
+        nama_lengkap: 'Ust. Irfan Hakim, S.Sos.I.',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Pasangkayu',
+        tanggal_lahir: '1988-03-29',
+        no_whatsapp: '081340990006',
+        dpd: 'DPD Pasangkayu',
+        dpc: 'DPC Pasangkayu',
+        alamat: 'Jl. Ir. Soekarno No. 11, Kel. Pasangkayu',
+        profesi: 'Dai & Penyuluh Agama Islam',
+        marhalah: 'Takwin 2',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03', 'PLT-04', 'PLT-05']
+      },
+      {
+        reg_seq: 7,
+        id_kader: 'WI-TK2-0007',
+        nama_lengkap: 'Nurul Hidayah Al-Mandari, S.Kep., Ns.',
+        jenis_kelamin: 'Akhwat',
+        tempat_lahir: 'Wonomulyo',
+        tanggal_lahir: '1991-08-19',
+        no_whatsapp: '085399550007',
+        dpd: 'DPD Polewali Mandar',
+        dpc: 'DPC Wonomulyo',
+        alamat: 'Jl. Pendidikan No. 09, Kel. Sidodadi',
+        profesi: 'Perawat RSUD & Pengajar Dirosa',
+        marhalah: 'Takwin 2',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03', 'PLT-04']
+      },
+      {
+        reg_seq: 8,
+        id_kader: 'WI-TK1-0008',
+        nama_lengkap: 'Ust. Lukmanul Hakim, S.H.I.',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Topoyo',
+        tanggal_lahir: '1989-12-03',
+        no_whatsapp: '081245110008',
+        dpd: 'DPD Mamuju Tengah',
+        dpc: 'DPC Tobadak',
+        alamat: 'Dusun Mahahe, Desa Tobadak',
+        profesi: 'Kepala SD Islam Terpadu',
+        marhalah: 'Takwin 1',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03', 'PLT-06']
+      },
+      {
+        reg_seq: 9,
+        id_kader: 'WI-TK1-0009',
+        nama_lengkap: 'apt. Rahmawati Tahir, S.Farm.',
+        jenis_kelamin: 'Akhwat',
+        tempat_lahir: 'Majene',
+        tanggal_lahir: '1993-02-25',
+        no_whatsapp: '085255880009',
+        dpd: 'DPD Majene',
+        dpc: 'DPC Pamboang',
+        alamat: 'Jl. Poros Majene-Mamuju, Kel. Lalampanua',
+        profesi: 'Apoteker & Wirausaha Muslimah',
+        marhalah: 'Takwin 1',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03']
+      },
+      {
+        reg_seq: 10,
+        id_kader: 'WI-TK1-0010',
+        nama_lengkap: 'Ust. Sulaiman Taufik, S.Pd.',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Mamasa',
+        tanggal_lahir: '1987-07-08',
+        no_whatsapp: '081354130010',
+        dpd: 'DPD Mamasa',
+        dpc: 'DPC Mamasa',
+        alamat: 'Jl. Demmatande No. 31, Kel. Mamasa',
+        profesi: 'Guru ASN & Dai Pedalaman',
+        marhalah: 'Takwin 1',
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-03', 'PLT-05']
+      },
+      {
+        reg_seq: 11,
+        id_kader: 'WI-T2-0011',
+        nama_lengkap: 'Hendra Kusuma Wijaya, S.T., M.T.',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Mamuju',
+        tanggal_lahir: '1992-05-16',
+        no_whatsapp: '081142150011',
+        dpd: 'DPD Mamuju',
+        dpc: 'DPC Mamuju',
+        alamat: 'Jl. Yos Sudarso No. 77, Kel. Rimuku',
+        profesi: 'Insinyur Sipil & Koordinator Lazis',
+        marhalah: "Ta'rif 2",
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-06']
+      },
+      {
+        reg_seq: 12,
+        id_kader: 'WI-T2-0012',
+        nama_lengkap: 'Hasriani Mahmud, S.E.',
+        jenis_kelamin: 'Akhwat',
+        tempat_lahir: 'Baras',
+        tanggal_lahir: '1994-10-11',
+        no_whatsapp: '082290100012',
+        dpd: 'DPD Pasangkayu',
+        dpc: 'DPC Baras',
+        alamat: 'Jl. Trans Sulawesi KM 14, Desa Motu',
+        profesi: 'Akuntan & Pengelola ZISWAF',
+        marhalah: "Ta'rif 2",
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02', 'PLT-06']
+      },
+      {
+        reg_seq: 13,
+        id_kader: 'WI-T2-0013',
+        nama_lengkap: 'Zulkifli Anwar, S.Kom.',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Campalagian',
+        tanggal_lahir: '1995-01-30',
+        no_whatsapp: '082188660013',
+        dpd: 'DPD Polewali Mandar',
+        dpc: 'DPC Campalagian',
+        alamat: 'Jl. Poros Polewali-Majene, Desa Bonde',
+        profesi: 'Web Developer & Admin IT',
+        marhalah: "Ta'rif 2",
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02']
+      },
+      {
+        reg_seq: 14,
+        id_kader: 'WI-T1-0014',
+        nama_lengkap: 'Khadijah Rauf, S.Keb.',
+        jenis_kelamin: 'Akhwat',
+        tempat_lahir: 'Sumarorong',
+        tanggal_lahir: '1996-04-02',
+        no_whatsapp: '085298140014',
+        dpd: 'DPD Mamasa',
+        dpc: 'DPC Sumarorong',
+        alamat: 'Lingkungan Tadisi, Kel. Sumarorong',
+        profesi: 'Bidan Desa',
+        marhalah: "Ta'rif 1",
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01', 'PLT-02']
+      },
+      {
+        reg_seq: 15,
+        id_kader: 'WI-T1-0015',
+        nama_lengkap: 'Muh. Ilham Saputra, S.Pd.',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Sendana',
+        tanggal_lahir: '1997-08-23',
+        no_whatsapp: '082348160015',
+        dpd: 'DPD Majene',
+        dpc: 'DPC Sendana',
+        alamat: 'Jl. Pendidikan Somba, Kel. Mosso Dhua',
+        profesi: 'Guru Bahasa Arab',
+        marhalah: "Ta'rif 1",
+        status: 'Kurang Aktif',
+        pelatihan_ids: ['PLT-01']
+      },
+      {
+        reg_seq: 16,
+        id_kader: 'WI-T1-0016',
+        nama_lengkap: 'Abdul Malik, S.P.',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Topoyo',
+        tanggal_lahir: '1994-06-19',
+        no_whatsapp: '085342160016',
+        dpd: 'DPD Mamuju Tengah',
+        dpc: 'DPC Topoyo',
+        alamat: 'Jl. Poros Benteng, Desa Topoyo',
+        profesi: 'Penyuluh Pertanian',
+        marhalah: "Ta'rif 1",
+        status: 'Kurang Aktif',
+        pelatihan_ids: ['PLT-01']
+      },
+      {
+        reg_seq: 17,
+        id_kader: 'WI-PT-0017',
+        nama_lengkap: 'Miftahul Jannah, S.Gz.',
+        jenis_kelamin: 'Akhwat',
+        tempat_lahir: 'Budong-Budong',
+        tanggal_lahir: '1998-11-27',
+        no_whatsapp: '085341120017',
+        dpd: 'DPD Mamuju Tengah',
+        dpc: 'DPC Budong-Budong',
+        alamat: 'Dusun Babana Timur, Desa Babana',
+        profesi: 'Ahli Gizi Puskesmas',
+        marhalah: "Pra-Ta'rif",
+        status: 'Aktif',
+        pelatihan_ids: ['PLT-01']
+      },
+      {
+        reg_seq: 18,
+        id_kader: 'WI-PT-0018',
+        nama_lengkap: 'Ahmad Fadhil Ramadhan',
+        jenis_kelamin: 'Ikhwan',
+        tempat_lahir: 'Tinambung',
+        tanggal_lahir: '2001-12-09',
+        no_whatsapp: '082251180018',
+        dpd: 'DPD Polewali Mandar',
+        dpc: 'DPC Tinambung',
+        alamat: 'Jl. Syekh Hasan Yamani, Kel. Tinambung',
+        profesi: 'Mahasiswa & Pengajar TPA',
+        marhalah: "Pra-Ta'rif",
+        status: 'Kurang Aktif',
+        pelatihan_ids: []
+      }
+    ];
+
+    // =========================================================================
+    // 3. STATE APLIKASI & INISIALISASI CLIENT SUPABASE
+    // =========================================================================
+    let supabaseClient = null;
+    let isSupabaseConfigured = false;
+    let isSupabaseConnected = false;
+
+    let kaderList = [];
+    let pelatihanList = [];
+    let currentPage = 'dashboard';
+
+    let chartDpdInstance = null;
+    let chartMarhalahInstance = null;
+    let chartPelatihanInstance = null;
+
+    function initSupabaseClient() {
+      const urlValid = typeof SUPABASE_URL === 'string' &&
+        SUPABASE_URL.trim() !== '' &&
+        !SUPABASE_URL.includes('[TEMPEL_PROJECT_URL]') &&
+        SUPABASE_URL.startsWith('http');
+
+      const keyValid = typeof SUPABASE_ANON_KEY === 'string' &&
+        SUPABASE_ANON_KEY.trim() !== '' &&
+        !SUPABASE_ANON_KEY.includes('[TEMPEL_ANON_KEY]');
+
+      if (urlValid && keyValid && window.supabase && typeof window.supabase.createClient === 'function') {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL.trim(), SUPABASE_ANON_KEY.trim());
+          isSupabaseConfigured = true;
+          return;
+        } catch (err) {
+          console.error('Gagal menginisialisasi client Supabase:', err);
+        }
+      }
+
+      isSupabaseConfigured = false;
+      supabaseClient = null;
+    }
+
+    // =========================================================================
+    // 4. INDIKATOR STATUS HEADER (SUPABASE & GITHUB BACKUP)
+    // =========================================================================
+    function setSupabaseStatusIndicator(state, customText = '') {
+      const badge = document.getElementById('status-supabase-badge');
+      const dot = document.getElementById('status-supabase-dot');
+      const text = document.getElementById('status-supabase-text');
+      if (!badge || !dot || !text) return;
+
+      if (state === 'connected') {
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e6eee9] border border-[#b8cdc1] text-[#0f766e] text-[11px] font-bold';
+        dot.className = 'w-2 h-2 rounded-full bg-[#0f766e] shrink-0';
+        text.textContent = customText || 'Supabase: Terhubung';
+      } else if (state === 'loading') {
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-[11px] font-bold';
+        dot.className = 'w-2 h-2 rounded-full bg-teal-500 animate-pulse shrink-0';
+        text.textContent = customText || 'Supabase: Memuat...';
+      } else if (state === 'error') {
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-bold';
+        dot.className = 'w-2 h-2 rounded-full bg-rose-500 shrink-0';
+        text.textContent = customText || 'Supabase: Gagal Terhubung';
+      } else {
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500 shrink-0';
+        text.textContent = customText || 'Supabase: Belum Dikonfigurasi';
+      }
+    }
+
+    function formatRelativeBackupTime(ts) {
+      if (!ts) return null;
+      const diffSec = Math.max(0, Math.floor((Date.now() - Number(ts)) / 1000));
+      if (diffSec < 60) return 'Baru saja';
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `${diffMin} menit lalu`;
+      const diffHour = Math.floor(diffMin / 60);
+      if (diffHour < 24) return `${diffHour} jam lalu`;
+      const diffDay = Math.floor(diffHour / 24);
+      return `${diffDay} hari lalu`;
+    }
+
+    function refreshGithubBackupIndicator(overrideState = null) {
+      const dot = document.getElementById('status-github-dot');
+      const text = document.getElementById('status-github-text');
+      if (!dot || !text) return;
+
+      if (overrideState === 'syncing') {
+        dot.className = 'w-2 h-2 rounded-full bg-teal-500 animate-pulse shrink-0';
+        text.textContent = 'Backup GitHub: Menyinkronkan...';
+        return;
+      }
+      if (overrideState === 'restoring') {
+        dot.className = 'w-2 h-2 rounded-full bg-teal-500 animate-pulse shrink-0';
+        text.textContent = 'Backup GitHub: Memulihkan...';
+        return;
+      }
+      if (overrideState === 'error') {
+        dot.className = 'w-2 h-2 rounded-full bg-rose-500 shrink-0';
+        text.textContent = 'Backup GitHub: Gagal Sinkron';
+        return;
+      }
+
+      const cfg = getGithubConfig();
+      const lastTs = localStorage.getItem(STORAGE_KEYS.GH_LAST_BACKUP);
+
+      if (!cfg.token || !cfg.username || !cfg.repo) {
+        dot.className = 'w-2 h-2 rounded-full bg-[#7c9a82] shrink-0';
+        text.textContent = 'Backup GitHub: Belum diatur';
+        return;
+      }
+
+      if (lastTs) {
+        dot.className = 'w-2 h-2 rounded-full bg-[#0f766e] shrink-0';
+        text.textContent = `Backup GitHub: ${formatRelativeBackupTime(lastTs)}`;
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-[#5f8575] shrink-0';
+        text.textContent = 'Backup GitHub: Siap';
+      }
+    }
+
+    // =========================================================================
+    // 5. UTILITAS ENCODING UTF-8 BASE64, FORMATTER & VALIDASI WHATSAPP
+    // =========================================================================
+    function utf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    }
+
+    function base64ToUtf8(base64) {
+      const cleanBase64 = String(base64 || '').replace(/\s/g, '');
+      const binary = atob(cleanBase64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new TextDecoder().decode(bytes);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getMarhalahCode(marhalahLabel) {
+      const found = MARHALAH_LIST.find(m => m.label === marhalahLabel);
+      return found ? found.code : 'PT';
+    }
+
+    function formatKaderId(marhalahLabel, regSeq) {
+      const code = getMarhalahCode(marhalahLabel);
+      const paddedSeq = String(Number(regSeq) || 1).padStart(4, '0');
+      return `WI-${code}-${paddedSeq}`;
+    }
+
+    function getNextRegSeq() {
+      if (kaderList.length === 0) return 1;
+      const maxSeq = kaderList.reduce((max, item) => Math.max(max, Number(item.reg_seq) || 0), 0);
+      return maxSeq + 1;
+    }
+
+    function makeKaderDbId(regSeq) {
+      return `KDR-${String(Number(regSeq) || 1).padStart(4, '0')}`;
+    }
+
+    // Normalisasi Nomor WhatsApp (08..., +628..., 628... -> 628...)
+    function normalizeWhatsApp(raw) {
+      let digits = String(raw || '').replace(/\D/g, '');
+      if (!digits) return '';
+      if (digits.startsWith('0')) {
+        digits = '62' + digits.slice(1);
+      } else if (digits.startsWith('8')) {
+        digits = '62' + digits;
+      }
+      return digits;
+    }
+
+    function formatTanggalIndonesia(isoDate) {
+      if (!isoDate) return '-';
+      const parts = String(isoDate).split('-');
+      if (parts.length !== 3) return isoDate;
+      const bulan = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      ];
+      const idx = parseInt(parts[1], 10) - 1;
+      const namaBulan = bulan[idx] || parts[1];
+      return `${parseInt(parts[2], 10)} ${namaBulan} ${parts[0]}`;
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const isError = type === 'error';
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-lg border text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 transition-all duration-200 ${
+        isError
+          ? 'bg-rose-950 text-rose-50 border-rose-700'
+          : 'bg-[#0b4f4a] text-white border-[#5f8575]'
+      }`;
+
+      toast.innerHTML = `
+        <span>${escapeHtml(message)}</span>
+        <button type="button" class="text-white/75 hover:text-white font-bold px-1 cursor-pointer" aria-label="Tutup">&times;</button>
+      `;
+
+      const closeBtn = toast.querySelector('button');
+      if (closeBtn) closeBtn.onclick = () => toast.remove();
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+      }, 4500);
+    }
+
+    // =========================================================================
+    // 6. OPERASI DATABASE UTAMA (SUPABASE "data_utama" + FALLBACK LOKAL)
+    // =========================================================================
+    function cloneDefaultData() {
+      pelatihanList = DEFAULT_PELATIHAN.map(item => ({ ...item }));
+      kaderList = DEFAULT_KADER.map(item => ({
+        ...item,
+        id_kader: formatKaderId(item.marhalah, item.reg_seq),
+        pelatihan_ids: [...item.pelatihan_ids]
+      }));
+    }
+
+    function saveFallbackToLocalStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.PELATIHAN_FALLBACK, JSON.stringify(pelatihanList));
+        localStorage.setItem(STORAGE_KEYS.KADER_FALLBACK, JSON.stringify(kaderList));
+      } catch (err) {
+        console.warn('Gagal menyimpan cache lokal:', err);
+      }
+    }
+
+    function loadFallbackFromLocalStorage() {
+      try {
+        const rawP = localStorage.getItem(STORAGE_KEYS.PELATIHAN_FALLBACK);
+        const rawK = localStorage.getItem(STORAGE_KEYS.KADER_FALLBACK);
+        if (rawP && rawK) {
+          const parsedP = JSON.parse(rawP);
+          const parsedK = JSON.parse(rawK);
+          if (Array.isArray(parsedP) && Array.isArray(parsedK)) {
+            pelatihanList = parsedP;
+            kaderList = parsedK.map((k, idx) => {
+              const seq = Number(k.reg_seq) || (idx + 1);
+              const marhalah = MARHALAH_LIST.some(m => m.label === k.marhalah) ? k.marhalah : "Pra-Ta'rif";
+              return {
+                ...k,
+                reg_seq: seq,
+                id_kader: formatKaderId(marhalah, seq),
+                pelatihan_ids: Array.isArray(k.pelatihan_ids) ? k.pelatihan_ids : []
+              };
+            });
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Fallback localStorage tidak terbaca, memuat data contoh bawaan:', err);
+      }
+      cloneDefaultData();
+      saveFallbackToLocalStorage();
+    }
+
+    function buildRowsFromCurrentState() {
+      const nowIso = new Date().toISOString();
+      const rows = [];
+
+      pelatihanList.forEach(plt => {
+        rows.push({
+          id: plt.id,
+          tipe_data: 'pelatihan',
+          payload: {
+            id: plt.id,
+            kode: plt.kode,
+            nama: plt.nama
+          },
+          updated_at: nowIso
+        });
+      });
+
+      kaderList.forEach(k => {
+        const dbId = makeKaderDbId(k.reg_seq);
+        rows.push({
+          id: dbId,
+          tipe_data: 'kader',
+          payload: {
+            reg_seq: Number(k.reg_seq),
+            id_kader: formatKaderId(k.marhalah, k.reg_seq),
+            nama_lengkap: k.nama_lengkap,
+            jenis_kelamin: k.jenis_kelamin,
+            tempat_lahir: k.tempat_lahir,
+            tanggal_lahir: k.tanggal_lahir,
+            no_whatsapp: k.no_whatsapp,
+            dpd: k.dpd,
+            dpc: k.dpc,
+            alamat: k.alamat,
+            profesi: k.profesi,
+            marhalah: k.marhalah,
+            status: k.status,
+            pelatihan_ids: Array.isArray(k.pelatihan_ids) ? k.pelatihan_ids : []
+          },
+          updated_at: nowIso
+        });
+      });
+
+      return rows;
+    }
+
+    function hydrateStateFromRows(rows) {
+      const nextPelatihan = [];
+      const nextKader = [];
+
+      (rows || []).forEach(row => {
+        if (!row || !row.payload) return;
+        const p = row.payload;
+
+        if (row.tipe_data === 'pelatihan') {
+          nextPelatihan.push({
+            id: String(p.id || row.id),
+            kode: String(p.kode || '-'),
+            nama: String(p.nama || 'Pelatihan Tanpa Nama')
+          });
+        } else if (row.tipe_data === 'kader') {
+          const seq = Number(p.reg_seq) || (nextKader.length + 1);
+          const marhalah = MARHALAH_LIST.some(m => m.label === p.marhalah) ? p.marhalah : "Pra-Ta'rif";
+          nextKader.push({
+            reg_seq: seq,
+            id_kader: formatKaderId(marhalah, seq),
+            nama_lengkap: String(p.nama_lengkap || ''),
+            jenis_kelamin: p.jenis_kelamin === 'Akhwat' ? 'Akhwat' : 'Ikhwan',
+            tempat_lahir: String(p.tempat_lahir || ''),
+            tanggal_lahir: String(p.tanggal_lahir || ''),
+            no_whatsapp: String(p.no_whatsapp || ''),
+            dpd: DPD_LIST.includes(p.dpd) ? p.dpd : DPD_LIST[0],
+            dpc: String(p.dpc || ''),
+            alamat: String(p.alamat || ''),
+            profesi: String(p.profesi || ''),
+            marhalah: marhalah,
+            status: p.status === 'Kurang Aktif' ? 'Kurang Aktif' : 'Aktif',
+            pelatihan_ids: Array.isArray(p.pelatihan_ids) ? p.pelatihan_ids.map(String) : []
+          });
+        }
+      });
+
+      nextKader.sort((a, b) => Number(b.reg_seq) - Number(a.reg_seq));
+      pelatihanList = nextPelatihan;
+      kaderList = nextKader;
+      saveFallbackToLocalStorage();
+    }
+
+    // Muat data awal saat aplikasi dibuka
+    async function loadInitialData() {
+      initSupabaseClient();
+
+      if (!isSupabaseConfigured || !supabaseClient) {
+        isSupabaseConnected = false;
+        setSupabaseStatusIndicator('unconfigured', 'Supabase: Belum Dikonfigurasi');
+        loadFallbackFromLocalStorage();
+        refreshAllViews();
+        return;
+      }
+
+      setSupabaseStatusIndicator('loading', 'Supabase: Memuat...');
+      try {
+        const { data, error } = await supabaseClient
+          .from(SUPABASE_TABLE)
+          .select('id, tipe_data, payload, updated_at')
+          .order('id', { ascending: true });
+
+        if (error) throw error;
+
+        isSupabaseConnected = true;
+        setSupabaseStatusIndicator('connected', 'Supabase: Terhubung');
+        hydrateStateFromRows(data || []);
+        refreshAllViews();
+      } catch (err) {
+        console.error('Gagal memuat data dari Supabase:', err);
+        isSupabaseConnected = false;
+        setSupabaseStatusIndicator('error', 'Supabase: Gagal Terhubung');
+        loadFallbackFromLocalStorage();
+        refreshAllViews();
+        showToast('Gagal memuat dari Supabase. Menampilkan data cadangan lokal.', 'error');
+      }
+    }
+
+    // Simpan / Upsert baris ke Supabase lalu jalankan Auto-Backup GitHub
+    async function upsertRowsToSupabaseAndBackup(rowsToUpsert) {
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from(SUPABASE_TABLE)
+          .upsert(rowsToUpsert, { onConflict: 'id' });
+
+        if (error) {
+          throw new Error(error.message || 'Gagal menyimpan ke Supabase');
+        }
+        isSupabaseConnected = true;
+        setSupabaseStatusIndicator('connected', 'Supabase: Terhubung');
+      }
+
+      saveFallbackToLocalStorage();
+      // Jalankan sinkronisasi backup ke GitHub di latar belakang
+      syncBackupToGitHub();
+    }
+
+    // Hapus baris dari Supabase lalu jalankan Auto-Backup GitHub
+    async function deleteRowFromSupabaseAndBackup(rowId, additionalRowsToUpsert = []) {
+      if (isSupabaseConfigured && supabaseClient) {
+        const { error } = await supabaseClient
+          .from(SUPABASE_TABLE)
+          .delete()
+          .eq('id', rowId);
+
+        if (error) {
+          throw new Error(error.message || 'Gagal menghapus data di Supabase');
+        }
+
+        if (additionalRowsToUpsert.length > 0) {
+          const { error: upsertErr } = await supabaseClient
+            .from(SUPABASE_TABLE)
+            .upsert(additionalRowsToUpsert, { onConflict: 'id' });
+          if (upsertErr) {
+            throw new Error(upsertErr.message || 'Gagal memperbarui relasi di Supabase');
+          }
+        }
+
+        isSupabaseConnected = true;
+        setSupabaseStatusIndicator('connected', 'Supabase: Terhubung');
+      }
+
+      saveFallbackToLocalStorage();
+      // Jalankan sinkronisasi backup ke GitHub di latar belakang
+      syncBackupToGitHub();
+    }
+
+    // =========================================================================
+    // 7. DUAL-SYNC: AUTO-BACKUP & RESTORE MELALUI GITHUB REST API
+    // =========================================================================
+    function getGithubConfig() {
+      return {
+        token: (localStorage.getItem(STORAGE_KEYS.GH_TOKEN) || '').trim(),
+        username: (localStorage.getItem(STORAGE_KEYS.GH_USERNAME) || '').trim(),
+        repo: (localStorage.getItem(STORAGE_KEYS.GH_REPO) || '').trim()
+      };
+    }
+
+    function buildGithubContentsEndpoint(username, repo) {
+      const safeUser = encodeURIComponent(username || '[USERNAME_GITHUB]');
+      const safeRepo = encodeURIComponent(repo || '[NAMA_REPO]');
+      return `https://api.github.com/repos/${safeUser}/${safeRepo}/contents/backup.json`;
+    }
+
+    // Sinkronisasi latar belakang otomatis ke GitHub setelah CRUD berhasil
+    async function syncBackupToGitHub() {
+      const cfg = getGithubConfig();
+      if (!cfg.token || !cfg.username || !cfg.repo) {
+        refreshGithubBackupIndicator();
+        return;
+      }
+
+      refreshGithubBackupIndicator('syncing');
+
+      try {
+        // 1. Ambil seluruh data terbaru dari tabel "data_utama" Supabase (atau state saat ini jika mode fallback)
+        let latestRows = [];
+        if (isSupabaseConfigured && supabaseClient) {
+          const { data, error } = await supabaseClient
+            .from(SUPABASE_TABLE)
+            .select('id, tipe_data, payload, updated_at')
+            .order('id', { ascending: true });
+
+          if (error) throw error;
+          latestRows = data || [];
+        } else {
+          latestRows = buildRowsFromCurrentState();
+        }
+
+        // 2. Ubah ke format JSON rapi & encode ke Base64 (UTF-8 safe)
+        const jsonPretty = JSON.stringify(latestRows, null, 2);
+        const base64Content = utf8ToBase64(jsonPretty);
+
+        const endpoint = buildGithubContentsEndpoint(cfg.username, cfg.repo);
+        const headers = {
+          'Authorization': `Bearer ${cfg.token}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        };
+
+        // 3. Cek nilai "sha" terbaru file backup.json di GitHub (jika file sudah ada)
+        let currentSha = null;
+        const getResp = await fetch(endpoint, {
+          method: 'GET',
+          headers,
+          cache: 'no-store'
+        });
+
+        if (getResp.ok) {
+          const existingFile = await getResp.json();
+          if (existingFile && existingFile.sha) {
+            currentSha = existingFile.sha;
+          }
+        } else if (getResp.status !== 404) {
+          const errBody = await getResp.json().catch(() => ({}));
+          throw new Error(errBody.message || `GitHub GET gagal (HTTP ${getResp.status})`);
+        }
+
+        // 4. Kirim (PUT) ke file backup.json di GitHub menggunakan nilai "sha" terbaru
+        const putPayload = {
+          message: `Auto-backup SIKAD Sulbar (${new Date().toISOString()})`,
+          content: base64Content
+        };
+        if (currentSha) {
+          putPayload.sha = currentSha;
+        }
+
+        const putResp = await fetch(endpoint, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(putPayload)
+        });
+
+        if (!putResp.ok) {
+          const errPut = await putResp.json().catch(() => ({}));
+          throw new Error(errPut.message || `GitHub PUT gagal (HTTP ${putResp.status})`);
+        }
+
+        // 5. Perbarui waktu terakhir berhasil backup di localStorage & indikator header
+        localStorage.setItem(STORAGE_KEYS.GH_LAST_BACKUP, String(Date.now()));
+        refreshGithubBackupIndicator();
+      } catch (err) {
+        console.error('Gagal auto-backup ke GitHub:', err);
+        refreshGithubBackupIndicator('error');
+        showToast(`Auto-backup GitHub gagal: ${err.message}`, 'error');
+      }
+    }
+
+    // Fitur Pemulihan (Restore dari Backup GitHub)
+    function confirmRestoreFromGitHub() {
+      const cfg = getGithubConfig();
+      if (!cfg.token || !cfg.username || !cfg.repo) {
+        showToast('Lengkapi Pengaturan Backup GitHub terlebih dahulu sebelum memulihkan data.', 'error');
+        openGithubSettingsModal();
+        return;
+      }
+
+      openConfirmModal({
+        title: 'Pulihkan Data dari Backup GitHub',
+        message: `Sistem akan mengambil file backup.json dari repositori "${cfg.username}/${cfg.repo}" dan memulihkan seluruh data ke database utama Supabase menggunakan metode .upsert(). Lanjutkan?`,
+        confirmText: 'Ya, Pulihkan Data',
+        confirmVariant: 'primary',
+        onConfirm: executeRestoreFromGitHub
+      });
+    }
+
+    async function executeRestoreFromGitHub() {
+      const cfg = getGithubConfig();
+      if (!cfg.token || !cfg.username || !cfg.repo) return;
+
+      refreshGithubBackupIndicator('restoring');
+
+      try {
+        const endpoint = buildGithubContentsEndpoint(cfg.username, cfg.repo);
+        const resp = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${cfg.token}`,
+            'Accept': 'application/vnd.github+json'
+          },
+          cache: 'no-store'
+        });
+
+        if (!resp.ok) {
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.message || `Gagal mengunduh backup.json (HTTP ${resp.status})`);
+        }
+
+        const fileJson = await resp.json();
+        if (!fileJson || !fileJson.content) {
+          throw new Error('Konten file backup.json kosong atau tidak ditemukan.');
+        }
+
+        // Decode dari Base64 (UTF-8 safe) & parse JSON
+        const decodedStr = base64ToUtf8(fileJson.content);
+        const parsed = JSON.parse(decodedStr);
+        const rawRecords = Array.isArray(parsed)
+          ? parsed
+          : (parsed && Array.isArray(parsed.records) ? parsed.records : null);
+
+        if (!rawRecords) {
+          throw new Error('Format JSON di dalam backup.json tidak valid.');
+        }
+
+        const nowIso = new Date().toISOString();
+        const validRecords = rawRecords
+          .filter(r => r && r.id && (r.tipe_data === 'kader' || r.tipe_data === 'pelatihan') && r.payload)
+          .map(r => ({
+            id: String(r.id),
+            tipe_data: r.tipe_data,
+            payload: r.payload,
+            updated_at: r.updated_at || nowIso
+          }));
+
+        if (validRecords.length === 0) {
+          throw new Error('Tidak ada baris data valid di dalam backup.json.');
+        }
+
+        // Masukkan kembali ke tabel Supabase menggunakan metode .upsert()
+        if (isSupabaseConfigured && supabaseClient) {
+          const { error } = await supabaseClient
+            .from(SUPABASE_TABLE)
+            .upsert(validRecords, { onConflict: 'id' });
+
+          if (error) {
+            throw new Error(error.message || 'Gagal melakukan .upsert() ke Supabase');
+          }
+
+          await loadInitialData();
+        } else {
+          hydrateStateFromRows(validRecords);
+          refreshAllViews();
+        }
+
+        refreshGithubBackupIndicator();
+        closeGithubSettingsModal();
+        showToast(`Berhasil memulihkan ${validRecords.length} baris data dari backup.json GitHub.`, 'success');
+      } catch (err) {
+        console.error('Gagal restore dari GitHub:', err);
+        refreshGithubBackupIndicator('error');
+        showToast(`Pemulihan gagal: ${err.message}`, 'error');
+      }
+    }
+
+    // =========================================================================
+    // 8. MODAL PENGATURAN BACKUP GITHUB & SALIN SQL
+    // =========================================================================
+    function openGithubSettingsModal() {
+      const cfg = getGithubConfig();
+      const tokenInput = document.getElementById('gh-token');
+      const userInput = document.getElementById('gh-username');
+      const repoInput = document.getElementById('gh-repo');
+
+      tokenInput.value = cfg.token;
+      tokenInput.type = 'password';
+      document.getElementById('btn-toggle-gh-token').textContent = 'Tampilkan';
+
+      userInput.value = cfg.username;
+      repoInput.value = cfg.repo;
+
+      updateGithubEndpointPreview();
+      document.getElementById('modal-github-settings').classList.remove('hidden');
+    }
+
+    function closeGithubSettingsModal() {
+      document.getElementById('modal-github-settings').classList.add('hidden');
+    }
+
+    function toggleGithubTokenVisibility() {
+      const input = document.getElementById('gh-token');
+      const btn = document.getElementById('btn-toggle-gh-token');
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Sembunyikan';
+      } else {
+        input.type = 'password';
+        btn.textContent = 'Tampilkan';
+      }
+    }
+
+    function updateGithubEndpointPreview() {
+      const user = document.getElementById('gh-username').value.trim() || '[USERNAME_GITHUB]';
+      const repo = document.getElementById('gh-repo').value.trim() || '[NAMA_REPO]';
+      document.getElementById('gh-endpoint-preview').textContent =
+        `https://api.github.com/repos/${user}/${repo}/contents/backup.json`;
+    }
+
+    function handleSaveGithubSettings(event) {
+      event.preventDefault();
+      const token = document.getElementById('gh-token').value.trim();
+      const username = document.getElementById('gh-username').value.trim();
+      const repo = document.getElementById('gh-repo').value.trim();
+
+      try {
+        localStorage.setItem(STORAGE_KEYS.GH_TOKEN, token);
+        localStorage.setItem(STORAGE_KEYS.GH_USERNAME, username);
+        localStorage.setItem(STORAGE_KEYS.GH_REPO, repo);
+      } catch (err) {
+        showToast('Gagal menyimpan pengaturan ke localStorage.', 'error');
+        return;
+      }
+
+      refreshGithubBackupIndicator();
+      closeGithubSettingsModal();
+
+      if (token && username && repo) {
+        showToast('Pengaturan Backup GitHub disimpan. Menjalankan sinkronisasi awal...', 'success');
+        syncBackupToGitHub();
+      } else {
+        showToast('Pengaturan GitHub diperbarui.', 'success');
+      }
+    }
+
+    function copySupabaseSqlSnippet() {
+      const sqlText = document.getElementById('supabase-sql-snippet')?.textContent || '';
+      if (!sqlText) return;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = sqlText;
+      tempArea.setAttribute('readonly', '');
+      tempArea.style.position = 'fixed';
+      tempArea.style.left = '-9999px';
+      document.body.appendChild(tempArea);
+      tempArea.select();
+
+      try {
+        document.execCommand('copy');
+        showToast('Skrip SQL tabel "data_utama" berhasil disalin.', 'success');
+      } catch (err) {
+        showToast('Gagal menyalin otomatis. Silakan blok dan salin manual.', 'error');
+      } finally {
+        document.body.removeChild(tempArea);
+      }
+    }
+
+    // =========================================================================
+    // 9. NAVIGASI ANTAR 3 LAMAN & SIDEBAR MOBILE
+    // =========================================================================
+    function toggleMobileSidebar(open) {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('mobile-sidebar-backdrop');
+      if (!sidebar || !backdrop) return;
+
+      if (open) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    function navigateTo(pageKey) {
+      currentPage = pageKey;
+
+      const pages = {
+        dashboard: {
+          el: document.getElementById('page-dashboard'),
+          nav: document.getElementById('nav-dashboard'),
+          breadcrumb: 'Dashboard Analitik',
+          title: 'Dashboard Analitik Kader'
+        },
+        direktori: {
+          el: document.getElementById('page-direktori'),
+          nav: document.getElementById('nav-direktori'),
+          breadcrumb: 'Direktori Kader',
+          title: 'Direktori Kader Sulawesi Barat'
+        },
+        master: {
+          el: document.getElementById('page-master'),
+          nav: document.getElementById('nav-master'),
+          breadcrumb: 'Master Daurah & Pelatihan',
+          title: 'Master Daurah & Pelatihan'
+        }
+      };
+
+      Object.keys(pages).forEach(key => {
+        const item = pages[key];
+        if (!item.el || !item.nav) return;
+
+        if (key === pageKey) {
+          item.el.classList.remove('hidden');
+          item.nav.className = 'nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer bg-white/20 text-white shadow-sm border border-white/25';
+        } else {
+          item.el.classList.add('hidden');
+          item.nav.className = 'nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer text-white/80 hover:bg-white/10 hover:text-white border border-transparent';
+        }
+      });
+
+      const activeMeta = pages[pageKey];
+      if (activeMeta) {
+        document.getElementById('topbar-breadcrumb').textContent = activeMeta.breadcrumb;
+        document.getElementById('topbar-title').textContent = activeMeta.title;
+      }
+
+      toggleMobileSidebar(false);
+
+      if (pageKey === 'dashboard') {
+        renderDashboard();
+      } else if (pageKey === 'direktori') {
+        renderDirektoriTable();
+      } else if (pageKey === 'master') {
+        renderMasterTable();
+      }
+    }
+
+    function refreshAllViews() {
+      if (currentPage === 'dashboard') {
+        renderDashboard();
+      } else {
+        updateDashboardMetricsOnly();
+      }
+      renderDirektoriTable();
+      renderMasterTable();
+    }
+
+    // =========================================================================
+    // 10. LAMAN 1: DASHBOARD ANALITIK (CHART.JS TEAL & SAGE GREEN)
+    // =========================================================================
+    function destroyChartSafely(instance) {
+      if (instance && typeof instance.destroy === 'function') {
+        try {
+          instance.destroy();
+        } catch (err) {
+          console.warn('Peringatan saat destroy Chart.js:', err);
+        }
+      }
+      return null;
+    }
+
+    function updateDashboardMetricsOnly() {
+      const total = kaderList.length;
+      const aktifCount = kaderList.filter(k => k.status === 'Aktif').length;
+      const kurangAktifCount = kaderList.filter(k => k.status === 'Kurang Aktif').length;
+      const ikhwanCount = kaderList.filter(k => k.jenis_kelamin === 'Ikhwan').length;
+      const akhwatCount = kaderList.filter(k => k.jenis_kelamin === 'Akhwat').length;
+
+      const aktifPct = total > 0 ? ((aktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
+      const kurangAktifPct = total > 0 ? ((kurangAktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
+
+      document.getElementById('kpi-total-kader').textContent = total;
+      document.getElementById('kpi-gender-sub').textContent = `${ikhwanCount} Ikhwan • ${akhwatCount} Akhwat`;
+      document.getElementById('kpi-kader-aktif').textContent = aktifCount;
+      document.getElementById('kpi-kader-aktif-pct').textContent = `${aktifPct}%`;
+      document.getElementById('kpi-kader-kurang-aktif').textContent = kurangAktifCount;
+      document.getElementById('kpi-kader-kurang-aktif-pct').textContent = `${kurangAktifPct}%`;
+      document.getElementById('kpi-total-pelatihan').textContent = pelatihanList.length;
+
+      // Ringkasan 6 DPD Sulawesi Barat
+      const dpdListEl = document.getElementById('dpd-breakdown-list');
+      if (dpdListEl) {
+        dpdListEl.innerHTML = DPD_LIST.map(dpdName => {
+          const count = kaderList.filter(k => k.dpd === dpdName).length;
+          const shortName = dpdName.replace('DPD ', '');
+          return `
+            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
+              <span class="font-semibold text-slate-700 truncate">${escapeHtml(shortName)}</span>
+              <span class="font-extrabold text-[#0f766e] tabular-nums ml-1.5">${count}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Rincian 6 Jenjang Marhalah
+      const marhalahListEl = document.getElementById('marhalah-breakdown-list');
+      if (marhalahListEl) {
+        marhalahListEl.innerHTML = MARHALAH_LIST.map(m => {
+          const count = kaderList.filter(k => k.marhalah === m.label).length;
+          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+          return `
+            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${m.color};"></span>
+                <span class="font-bold text-slate-800 truncate">${escapeHtml(m.label)}</span>
+                <span class="font-mono text-[10px] text-[#5f8575]">(${m.code})</span>
+              </div>
+              <span class="font-extrabold text-slate-900 tabular-nums ml-1">${count} <span class="font-normal text-slate-400">(${pct}%)</span></span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Progress Bar Statistik Partisipasi Daurah & Pelatihan
+      const progressListEl = document.getElementById('pelatihan-progress-list');
+      if (progressListEl) {
+        if (pelatihanList.length === 0) {
+          progressListEl.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada program pelatihan terdaftar pada laman Master.</p>`;
+        } else {
+          progressListEl.innerHTML = pelatihanList.map(plt => {
+            const count = kaderList.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(plt.id)).length;
+            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            return `
+              <div class="space-y-1">
+                <div class="flex items-center justify-between gap-2 text-xs">
+                  <span class="font-bold text-slate-800 truncate">
+                    <span class="font-mono text-[#0f766e]">[${escapeHtml(plt.kode)}]</span> ${escapeHtml(plt.nama)}
+                  </span>
+                  <span class="font-extrabold text-[#0b4f4a] whitespace-nowrap tabular-nums">${count}/${total} (${pct}%)</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-[#e6eee9] overflow-hidden">
+                  <div class="h-full rounded-full bg-progress-gradient transition-all duration-300" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    }
+
+    function renderDashboard() {
+      updateDashboardMetricsOnly();
+
+      if (typeof window.Chart === 'undefined') return;
+
+      // 1. Grafik Batang: Sebaran Total Kader per DPD (Palet Teal & Sage Green)
+      const dpdCanvas = document.getElementById('chart-dpd');
+      if (dpdCanvas) {
+        chartDpdInstance = destroyChartSafely(chartDpdInstance);
+        const dpdLabels = DPD_LIST.map(d => d.replace('DPD ', ''));
+        const dpdCounts = DPD_LIST.map(d => kaderList.filter(k => k.dpd === d).length);
+
+        chartDpdInstance = new Chart(dpdCanvas, {
+          type: 'bar',
+          data: {
+            labels: dpdLabels,
+            datasets: [
+              {
+                label: 'Jumlah Kader',
+                data: dpdCounts,
+                backgroundColor: ['#0f766e', '#0d9488', '#3f7368', '#5f8575', '#7c9a82', '#84a98c'],
+                borderRadius: 8,
+                maxBarThickness: 44
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: (items) => 'DPD ' + items[0].label,
+                  label: (ctx) => ` Total Kader: ${ctx.parsed.y} orang`
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
+                grid: { color: '#e6eee9' }
+              },
+              x: {
+                ticks: { color: '#334155', font: { size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Grafik Donat: Jumlah Kader Berdasarkan 6 Jenjang Marhalah
+      const marhalahCanvas = document.getElementById('chart-marhalah');
+      if (marhalahCanvas) {
+        chartMarhalahInstance = destroyChartSafely(chartMarhalahInstance);
+        const mLabels = MARHALAH_LIST.map(m => `${m.label} (${m.code})`);
+        const mCounts = MARHALAH_LIST.map(m => kaderList.filter(k => k.marhalah === m.label).length);
+        const mColors = MARHALAH_LIST.map(m => m.color);
+
+        chartMarhalahInstance = new Chart(marhalahCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: mLabels,
+            datasets: [
+              {
+                data: mCounts,
+                backgroundColor: mColors,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => ` ${ctx.label}: ${ctx.parsed} kader`
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // 3. Grafik Batang Horizontal: Statistik Partisipasi Daurah & Pelatihan
+      const pelatihanCanvas = document.getElementById('chart-pelatihan');
+      if (pelatihanCanvas) {
+        chartPelatihanInstance = destroyChartSafely(chartPelatihanInstance);
+        const pLabels = pelatihanList.map(p => `[${p.kode}] ${p.nama}`);
+        const pCounts = pelatihanList.map(p =>
+          kaderList.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(p.id)).length
+        );
+
+        chartPelatihanInstance = new Chart(pelatihanCanvas, {
+          type: 'bar',
+          data: {
+            labels: pLabels,
+            datasets: [
+              {
+                label: 'Kader Peserta',
+                data: pCounts,
+                backgroundColor: '#0f766e',
+                hoverBackgroundColor: '#5f8575',
+                borderRadius: 6,
+                barThickness: 20
+              }
+            ]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => ` Telah diikuti oleh ${ctx.parsed.x} kader`
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
+                grid: { color: '#e6eee9' }
+              },
+              y: {
+                ticks: { color: '#1e293b', font: { size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // =========================================================================
+    // 11. LAMAN 2: DIREKTORI KADER (TABEL RINGKAS, EKSPOR CSV, DETAIL MODAL)
+    // =========================================================================
+    function getFilteredKader() {
+      const q = (document.getElementById('search-kader')?.value || '').trim().toLowerCase();
+      const dpd = document.getElementById('filter-dpd')?.value || 'ALL';
+      const marhalah = document.getElementById('filter-marhalah')?.value || 'ALL';
+      const gender = document.getElementById('filter-gender')?.value || 'ALL';
+      const status = document.getElementById('filter-status')?.value || 'ALL';
+
+      return kaderList.filter(k => {
+        const matchQuery = !q ||
+          k.nama_lengkap.toLowerCase().includes(q) ||
+          k.id_kader.toLowerCase().includes(q) ||
+          k.no_whatsapp.toLowerCase().includes(q) ||
+          k.profesi.toLowerCase().includes(q) ||
+          k.dpd.toLowerCase().includes(q) ||
+          k.dpc.toLowerCase().includes(q);
+
+        const matchDpd = dpd === 'ALL' || k.dpd === dpd;
+        const matchMarhalah = marhalah === 'ALL' || k.marhalah === marhalah;
+        const matchGender = gender === 'ALL' || k.jenis_kelamin === gender;
+        const matchStatus = status === 'ALL' || k.status === status;
+
+        return matchQuery && matchDpd && matchMarhalah && matchGender && matchStatus;
+      });
+    }
+
+    function renderDirektoriTable() {
+      const filtered = getFilteredKader();
+      const shownEl = document.getElementById('dir-shown-count');
+      const totalEl = document.getElementById('dir-total-count');
+      const tbody = document.getElementById('kader-tbody');
+      const emptyEl = document.getElementById('kader-empty-state');
+
+      if (shownEl) shownEl.textContent = filtered.length;
+      if (totalEl) totalEl.textContent = kaderList.length;
+      if (!tbody || !emptyEl) return;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      emptyEl.classList.add('hidden');
+
+      tbody.innerHTML = filtered.map(k => {
+        const genderBadge = k.jenis_kelamin === 'Ikhwan'
+          ? `<span class="inline-flex items-center text-[11px] font-bold text-[#0f766e] bg-[#e6eee9] border border-[#c5d7cd] px-2 py-0.5 rounded mt-1">Ikhwan</span>`
+          : `<span class="inline-flex items-center text-[11px] font-bold text-[#4a6b5d] bg-[#f4f7f5] border border-[#c5d7cd] px-2 py-0.5 rounded mt-1">Akhwat</span>`;
+
+        const statusBadge = k.status === 'Aktif'
+          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#e6eee9] text-[#0f766e] border border-[#b8cdc1]">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#0f766e]"></span>Aktif
+             </span>`
+          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Kurang Aktif
+             </span>`;
+
+        const waNormalized = normalizeWhatsApp(k.no_whatsapp);
+
+        return `
+          <tr class="hover:bg-[#f4f7f5]/90 transition-colors">
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <span class="font-mono text-xs font-extrabold text-[#0b4f4a] bg-[#e6eee9] px-2.5 py-1 rounded-lg border border-[#c5d7cd]">${escapeHtml(k.id_kader)}</span>
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900 leading-snug">${escapeHtml(k.nama_lengkap)}</div>
+              <div>${genderBadge}</div>
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-800 text-xs">${escapeHtml(k.dpd)}</div>
+              <div class="text-xs text-[#5f8575] mt-0.5">${escapeHtml(k.dpc || '-')}</div>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-teal-sage-gradient text-white shadow-2xs">${escapeHtml(k.marhalah)}</span>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <a href="https://wa.me/${escapeHtml(waNormalized)}" target="_blank" rel="noopener noreferrer" class="font-mono text-xs font-semibold text-[#0f766e] hover:text-[#0b4f4a] hover:underline">
+                ${escapeHtml(k.no_whatsapp)}
+              </a>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              ${statusBadge}
+            </td>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <button type="button" onclick="openDetailModal(${k.reg_seq})" class="px-2.5 py-1.5 rounded-lg bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white text-xs font-bold shadow-2xs transition-colors cursor-pointer">
+                  Detail
+                </button>
+                <button type="button" onclick="openKaderFormModal(${k.reg_seq})" class="px-2.5 py-1.5 rounded-lg bg-[#e6eee9] hover:bg-[#5f8575] text-[#2f5245] hover:text-white border border-[#c5d7cd] text-xs font-bold transition-colors cursor-pointer">
+                  Edit
+                </button>
+                <button type="button" onclick="confirmDeleteKader(${k.reg_seq})" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-xs font-bold transition-colors cursor-pointer">
+                  Hapus
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function resetDirektoriFilter() {
+      const s = document.getElementById('search-kader');
+      const d = document.getElementById('filter-dpd');
+      const m = document.getElementById('filter-marhalah');
+      const g = document.getElementById('filter-gender');
+      const st = document.getElementById('filter-status');
+
+      if (s) s.value = '';
+      if (d) d.value = 'ALL';
+      if (m) m.value = 'ALL';
+      if (g) g.value = 'ALL';
+      if (st) st.value = 'ALL';
+      renderDirektoriTable();
+    }
+
+    // Modal Detail Profil Kader
+    function openDetailModal(regSeq) {
+      const kader = kaderList.find(k => Number(k.reg_seq) === Number(regSeq));
+      if (!kader) return;
+
+      document.getElementById('detail-id-kader').textContent = kader.id_kader;
+      document.getElementById('detail-nama').textContent = kader.nama_lengkap;
+      document.getElementById('detail-profesi-header').textContent = kader.profesi || '-';
+      document.getElementById('detail-gender').textContent = kader.jenis_kelamin;
+      document.getElementById('detail-status').textContent = kader.status;
+
+      const ttl = kader.tempat_lahir
+        ? `${kader.tempat_lahir}, ${formatTanggalIndonesia(kader.tanggal_lahir)}`
+        : formatTanggalIndonesia(kader.tanggal_lahir);
+
+      document.getElementById('detail-ttl').textContent = ttl;
+      document.getElementById('detail-marhalah').textContent = `${kader.marhalah} (${getMarhalahCode(kader.marhalah)})`;
+      document.getElementById('detail-dpd-dpc').textContent = `${kader.dpd} — ${kader.dpc || '-'}`;
+      document.getElementById('detail-profesi').textContent = kader.profesi || '-';
+      document.getElementById('detail-alamat').textContent = kader.alamat || '-';
+      document.getElementById('detail-wa').textContent = kader.no_whatsapp;
+      document.getElementById('detail-wa-link').href = `https://wa.me/${normalizeWhatsApp(kader.no_whatsapp)}`;
+
+      // PENGECUALIAN KHUSUS:
+      // Pelatihan yang SUDAH diikuti => hijau terang + ikon centang (✓)
+      // Pelatihan yang BELUM diikuti => polos tanpa warna (putih/netral border abu-abu)
+      const attendedIds = Array.isArray(kader.pelatihan_ids) ? kader.pelatihan_ids : [];
+      const attendedCount = pelatihanList.filter(p => attendedIds.includes(p.id)).length;
+      document.getElementById('detail-pelatihan-summary').textContent =
+        `${attendedCount} dari ${pelatihanList.length} program pelatihan telah diikuti`;
+
+      const listContainer = document.getElementById('detail-pelatihan-list');
+      if (pelatihanList.length === 0) {
+        listContainer.innerHTML = `<p class="text-xs text-slate-400 italic col-span-full">Belum ada data master pelatihan.</p>`;
+      } else {
+        listContainer.innerHTML = pelatihanList.map(plt => {
+          const isAttended = attendedIds.includes(plt.id);
+          if (isAttended) {
+            return `
+              <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-emerald-100 text-emerald-950 border border-emerald-400 text-xs font-bold shadow-2xs">
+                <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">✓</span>
+                <div class="min-w-0">
+                  <span class="font-mono text-[11px] text-emerald-800 block">[${escapeHtml(plt.kode)}]</span>
+                  <span class="leading-snug block">${escapeHtml(plt.nama)}</span>
+                </div>
+              </div>
+            `;
+          } else {
+            return `
+              <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white text-slate-400 border border-slate-200 text-xs">
+                <span class="w-5 h-5 rounded-full border border-slate-200 flex items-center justify-center text-[10px] text-slate-300 shrink-0">&mdash;</span>
+                <div class="min-w-0">
+                  <span class="font-mono text-[11px] block">[${escapeHtml(plt.kode)}]</span>
+                  <span class="leading-snug block">${escapeHtml(plt.nama)}</span>
+                </div>
+              </div>
+            `;
+          }
+        }).join('');
+      }
+
+      document.getElementById('detail-btn-edit').onclick = () => {
+        closeDetailModal();
+        openKaderFormModal(kader.reg_seq);
+      };
+
+      document.getElementById('modal-detail').classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('modal-detail').classList.add('hidden');
+    }
+
+    // Ekspor CSV
+    function exportKaderCSV() {
+      const data = getFilteredKader();
+      if (data.length === 0) {
+        showToast('Tidak ada data kader yang dapat diekspor.', 'error');
+        return;
+      }
+
+      const headers = [
+        'No Induk Kader',
+        'Nama Lengkap',
+        'Jenis Kelamin',
+        'Tempat Lahir',
+        'Tanggal Lahir',
+        'No WhatsApp',
+        'DPD Domisili',
+        'DPC Domisili',
+        'Alamat Domisili',
+        'Profesi / Keahlian',
+        'Jenjang Marhalah',
+        'Status Kader',
+        'Riwayat Daurah & Pelatihan'
+      ];
+
+      const csvEscape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+
+      const rows = data.map(k => {
+        const pelatihanNames = (k.pelatihan_ids || [])
+          .map(pid => {
+            const found = pelatihanList.find(p => p.id === pid);
+            return found ? `[${found.kode}] ${found.nama}` : null;
+          })
+          .filter(Boolean)
+          .join('; ');
+
+        return [
+          k.id_kader,
+          k.nama_lengkap,
+          k.jenis_kelamin,
+          k.tempat_lahir,
+          k.tanggal_lahir,
+          k.no_whatsapp,
+          k.dpd,
+          k.dpc,
+          k.alamat,
+          k.profesi,
+          k.marhalah,
+          k.status,
+          pelatihanNames || '-'
+        ].map(csvEscape).join(',');
+      });
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      const today = new Date().toISOString().slice(0, 10);
+      link.href = url;
+      link.download = `sikad-wi-sulbar-${today}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast(`Berhasil mengekspor ${data.length} data kader ke CSV.`, 'success');
+    }
+
+    // =========================================================================
+    // 12. MODAL REGISTRASI / EDIT KADER & VALIDASI ANTI-DUPLIKASI WHATSAPP
+    // =========================================================================
+    function updateLiveIdPreview() {
+      const editSeqVal = document.getElementById('kader-edit-seq').value;
+      const marhalah = document.getElementById('input-marhalah').value;
+      const seqNum = editSeqVal ? Number(editSeqVal) : getNextRegSeq();
+      document.getElementById('live-id-preview').textContent = formatKaderId(marhalah, seqNum);
+    }
+
+    function validateWhatsAppLive() {
+      const waRaw = document.getElementById('input-wa').value.trim();
+      const editSeqVal = document.getElementById('kader-edit-seq').value;
+      const editSeqNum = editSeqVal ? Number(editSeqVal) : null;
+
+      const dupBox = document.getElementById('wa-duplicate-box');
+      const dupText = document.getElementById('wa-duplicate-text');
+      const helper = document.getElementById('wa-helper-text');
+      const waInput = document.getElementById('input-wa');
+
+      const norm = normalizeWhatsApp(waRaw);
+
+      if (!waRaw) {
+        dupBox.classList.add('hidden');
+        waInput.classList.remove('border-rose-500');
+        helper.textContent = 'Format 08..., 628..., atau +628... dinormalisasi otomatis untuk mencegah data ganda.';
+        helper.className = 'text-[11px] text-slate-500 mt-1';
+        return { valid: false, reason: 'Nomor WhatsApp wajib diisi.' };
+      }
+
+      if (norm.length < 9) {
+        dupBox.classList.add('hidden');
+        waInput.classList.add('border-rose-500');
+        helper.textContent = 'Nomor WhatsApp terlalu pendek (minimal 9 digit).';
+        helper.className = 'text-[11px] text-rose-600 font-semibold mt-1';
+        return { valid: false, reason: 'Nomor WhatsApp tidak valid (minimal 9 digit).' };
+      }
+
+      const duplicate = kaderList.find(k => {
+        if (editSeqNum !== null && Number(k.reg_seq) === editSeqNum) return false;
+        return normalizeWhatsApp(k.no_whatsapp) === norm;
+      });
+
+      if (duplicate) {
+        dupBox.classList.remove('hidden');
+        dupText.textContent = `Nomor WhatsApp (${waRaw}) sudah terdaftar atas nama ${duplicate.nama_lengkap} (${duplicate.id_kader} — ${duplicate.dpd}).`;
+        waInput.classList.add('border-rose-500');
+        helper.textContent = 'Gunakan nomor WhatsApp lain yang belum terdaftar.';
+        helper.className = 'text-[11px] text-rose-600 font-semibold mt-1';
+        return {
+          valid: false,
+          reason: `Nomor WhatsApp sudah dipakai oleh kader ${duplicate.nama_lengkap} (${duplicate.id_kader}).`
+        };
+      }
+
+      dupBox.classList.add('hidden');
+      waInput.classList.remove('border-rose-500');
+      helper.textContent = `Nomor WhatsApp valid dan tersedia (ternormalisasi: +${norm}).`;
+      helper.className = 'text-[11px] text-[#0f766e] font-semibold mt-1';
+      return { valid: true };
+    }
+
+    function toggleAllPelatihanCheckboxes(checkedState) {
+      document.querySelectorAll('input[name="chk-pelatihan"]').forEach(cb => {
+        cb.checked = checkedState;
+      });
+    }
+
+    function openKaderFormModal(editRegSeq = null) {
+      const form = document.getElementById('form-kader');
+      form.reset();
+
+      document.getElementById('wa-duplicate-box').classList.add('hidden');
+      document.getElementById('input-wa').classList.remove('border-rose-500');
+      document.getElementById('wa-helper-text').textContent = 'Format 08..., 628..., atau +628... dinormalisasi otomatis untuk mencegah data ganda.';
+      document.getElementById('wa-helper-text').className = 'text-[11px] text-slate-500 mt-1';
+
+      let selectedIds = [];
+
+      if (editRegSeq !== null) {
+        const kader = kaderList.find(k => Number(k.reg_seq) === Number(editRegSeq));
+        if (!kader) return;
+
+        document.getElementById('kader-edit-seq').value = kader.reg_seq;
+        document.getElementById('form-kader-title').textContent = `Edit Data Kader — ${kader.id_kader}`;
+
+        document.getElementById('input-nama').value = kader.nama_lengkap;
+        document.getElementById('input-gender').value = kader.jenis_kelamin;
+        document.getElementById('input-tempat-lahir').value = kader.tempat_lahir || '';
+        document.getElementById('input-tanggal-lahir').value = kader.tanggal_lahir || '';
+        document.getElementById('input-wa').value = kader.no_whatsapp;
+        document.getElementById('input-dpd').value = kader.dpd;
+        document.getElementById('input-dpc').value = kader.dpc || '';
+        document.getElementById('input-alamat').value = kader.alamat || '';
+        document.getElementById('input-marhalah').value = kader.marhalah;
+        document.getElementById('input-status').value = kader.status;
+        document.getElementById('input-profesi').value = kader.profesi || '';
+
+        selectedIds = Array.isArray(kader.pelatihan_ids) ? [...kader.pelatihan_ids] : [];
+      } else {
+        document.getElementById('kader-edit-seq').value = '';
+        document.getElementById('form-kader-title').textContent = 'Registrasi Kader Baru — SIKAD';
+        document.getElementById('input-marhalah').value = "Pra-Ta'rif";
+        document.getElementById('input-status').value = 'Aktif';
+      }
+
+      // Render checkbox dinamis dari Master Daurah & Pelatihan
+      const cbContainer = document.getElementById('form-pelatihan-checkboxes');
+      if (pelatihanList.length === 0) {
+        cbContainer.innerHTML = `<p class="text-xs text-slate-500 italic col-span-full">Belum ada pelatihan terdaftar pada laman Master.</p>`;
+      } else {
+        cbContainer.innerHTML = pelatihanList.map(plt => {
+          const isChecked = selectedIds.includes(plt.id) ? 'checked' : '';
+          return `
+            <label class="flex items-center gap-2.5 p-3 rounded-xl border border-[#d5e0d9] hover:border-[#0f766e] bg-[#f4f7f5]/80 hover:bg-[#e6eee9]/60 cursor-pointer transition-colors">
+              <input type="checkbox" name="chk-pelatihan" value="${escapeHtml(plt.id)}" ${isChecked} class="w-4 h-4 rounded border-[#abc3b5] accent-[#0f766e] cursor-pointer shrink-0" />
+              <span class="text-xs font-bold text-slate-800 leading-snug">
+                <span class="font-mono text-[#0f766e]">[${escapeHtml(plt.kode)}]</span> ${escapeHtml(plt.nama)}
+              </span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      updateLiveIdPreview();
+      document.getElementById('modal-kader-form').classList.remove('hidden');
+    }
+
+    function closeKaderFormModal() {
+      document.getElementById('modal-kader-form').classList.add('hidden');
+    }
+
+    async function handleKaderFormSubmit(event) {
+      event.preventDefault();
+
+      const waValidation = validateWhatsAppLive();
+      if (!waValidation.valid) {
+        showToast(waValidation.reason, 'error');
+        document.getElementById('input-wa').focus();
+        return;
+      }
+
+      const editSeqVal = document.getElementById('kader-edit-seq').value;
+      const nama = document.getElementById('input-nama').value.trim();
+      const gender = document.getElementById('input-gender').value;
+      const tempatLahir = document.getElementById('input-tempat-lahir').value.trim();
+      const tanggalLahir = document.getElementById('input-tanggal-lahir').value;
+      const waRaw = document.getElementById('input-wa').value.trim();
+      const dpd = document.getElementById('input-dpd').value;
+      const dpc = document.getElementById('input-dpc').value.trim();
+      const alamat = document.getElementById('input-alamat').value.trim();
+      const marhalah = document.getElementById('input-marhalah').value;
+      const status = document.getElementById('input-status').value;
+      const profesi = document.getElementById('input-profesi').value.trim();
+
+      const checkedBoxes = document.querySelectorAll('input[name="chk-pelatihan"]:checked');
+      const selectedPelatihanIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+      const seqNum = editSeqVal ? Number(editSeqVal) : getNextRegSeq();
+      const newIdKader = formatKaderId(marhalah, seqNum);
+      const kaderObj = {
+        reg_seq: seqNum,
+        id_kader: newIdKader,
+        nama_lengkap: nama,
+        jenis_kelamin: gender,
+        tempat_lahir: tempatLahir,
+        tanggal_lahir: tanggalLahir,
+        no_whatsapp: waRaw,
+        dpd: dpd,
+        dpc: dpc,
+        alamat: alamat,
+        profesi: profesi,
+        marhalah: marhalah,
+        status: status,
+        pelatihan_ids: selectedPelatihanIds
+      };
+
+      const dbRow = {
+        id: makeKaderDbId(seqNum),
+        tipe_data: 'kader',
+        payload: kaderObj,
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        await upsertRowsToSupabaseAndBackup([dbRow]);
+
+        if (editSeqVal) {
+          const idx = kaderList.findIndex(k => Number(k.reg_seq) === seqNum);
+          if (idx !== -1) kaderList[idx] = kaderObj;
+          showToast(`Data kader ${nama} (${newIdKader}) berhasil diperbarui.`, 'success');
+        } else {
+          kaderList.unshift(kaderObj);
+          showToast(`Kader baru ${nama} (${newIdKader}) berhasil didaftarkan.`, 'success');
+        }
+
+        saveFallbackToLocalStorage();
+        closeKaderFormModal();
+        refreshAllViews();
+      } catch (err) {
+        showToast(`Gagal menyimpan data kader: ${err.message}`, 'error');
+      }
+    }
+
+    // =========================================================================
+    // 13. LAMAN 3: MASTER DAURAH & PELATIHAN (SEDERHANA: KODE & NAMA SAJA)
+    // =========================================================================
+    function renderMasterTable() {
+      const badgeEl = document.getElementById('master-total-badge');
+      const tbody = document.getElementById('master-tbody');
+      if (badgeEl) badgeEl.textContent = pelatihanList.length;
+      if (!tbody) return;
+
+      if (pelatihanList.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="py-10 px-4 text-center text-xs sm:text-sm text-slate-500">
+              Belum ada program daurah/pelatihan terdaftar. Tambahkan melalui formulir di samping.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const totalKader = kaderList.length;
+
+      tbody.innerHTML = pelatihanList.map(plt => {
+        const count = kaderList.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(plt.id)).length;
+        const pct = totalKader > 0 ? Math.round((count / totalKader) * 100) : 0;
+
+        return `
+          <tr class="hover:bg-[#f4f7f5]/90 transition-colors">
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <span class="font-mono text-xs font-extrabold text-[#0b4f4a] bg-[#e6eee9] border border-[#c5d7cd] px-2.5 py-1 rounded-lg">${escapeHtml(plt.kode)}</span>
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="font-bold text-slate-900">${escapeHtml(plt.nama)}</span>
+            </td>
+            <td class="py-3.5 px-4 text-center whitespace-nowrap">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#e6eee9] text-[#0f766e] border border-[#c5d7cd] text-xs font-extrabold tabular-nums">
+                ${count} Kader <span class="font-normal text-[#5f8575]">(${pct}%)</span>
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <button type="button" onclick="editMasterItem('${escapeHtml(plt.id)}')" class="px-2.5 py-1.5 rounded-lg bg-[#e6eee9] hover:bg-[#5f8575] text-[#2f5245] hover:text-white border border-[#c5d7cd] text-xs font-bold transition-colors cursor-pointer">
+                  Edit
+                </button>
+                <button type="button" onclick="confirmDeleteMasterItem('${escapeHtml(plt.id)}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-xs font-bold transition-colors cursor-pointer">
+                  Hapus
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function handleMasterSubmit(event) {
+      event.preventDefault();
+      const editId = document.getElementById('master-edit-id').value;
+      const kode = document.getElementById('master-kode').value.trim().toUpperCase();
+      const nama = document.getElementById('master-nama').value.trim();
+
+      if (!kode || !nama) return;
+
+      const duplicateCode = pelatihanList.find(p => p.kode.toUpperCase() === kode && p.id !== editId);
+      if (duplicateCode) {
+        showToast(`Kode pelatihan "${kode}" sudah digunakan oleh "${duplicateCode.nama}".`, 'error');
+        document.getElementById('master-kode').focus();
+        return;
+      }
+
+      const targetId = editId || ('PLT-' + Date.now().toString(36).toUpperCase());
+      const pltObj = { id: targetId, kode, nama };
+      const dbRow = {
+        id: targetId,
+        tipe_data: 'pelatihan',
+        payload: pltObj,
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        await upsertRowsToSupabaseAndBackup([dbRow]);
+
+        if (editId) {
+          const idx = pelatihanList.findIndex(p => p.id === editId);
+          if (idx !== -1) pelatihanList[idx] = pltObj;
+          showToast(`Pelatihan "[${kode}] ${nama}" berhasil diperbarui.`, 'success');
+        } else {
+          pelatihanList.push(pltObj);
+          showToast(`Pelatihan "[${kode}] ${nama}" ditambahkan ke Master.`, 'success');
+        }
+
+        saveFallbackToLocalStorage();
+        resetMasterForm();
+        refreshAllViews();
+      } catch (err) {
+        showToast(`Gagal menyimpan pelatihan: ${err.message}`, 'error');
+      }
+    }
+
+    function editMasterItem(id) {
+      const plt = pelatihanList.find(p => p.id === id);
+      if (!plt) return;
+
+      document.getElementById('master-edit-id').value = plt.id;
+      document.getElementById('master-kode').value = plt.kode;
+      document.getElementById('master-nama').value = plt.nama;
+
+      document.getElementById('master-form-heading').textContent = 'Edit Daurah / Pelatihan';
+      document.getElementById('btn-cancel-master-edit').classList.remove('hidden');
+      document.getElementById('btn-submit-master').innerHTML = `<span>Simpan Perubahan</span>`;
+      document.getElementById('master-kode').focus();
+    }
+
+    function resetMasterForm() {
+      document.getElementById('form-master').reset();
+      document.getElementById('master-edit-id').value = '';
+      document.getElementById('master-form-heading').textContent = 'Tambah Pelatihan Baru';
+      document.getElementById('btn-cancel-master-edit').classList.add('hidden');
+      document.getElementById('btn-submit-master').innerHTML = `
+        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Simpan ke Daftar Master</span>
+      `;
+    }
+
+    // =========================================================================
+    // 14. MODAL KONFIRMASI CUSTOM (HAPUS KADER, HAPUS MASTER, RESET DATA)
+    // =========================================================================
+    function openConfirmModal({ title, message, confirmText, confirmVariant = 'danger', onConfirm }) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = message;
+
+      const execBtn = document.getElementById('confirm-execute-btn');
+      execBtn.textContent = confirmText || 'Ya, Lanjutkan';
+      execBtn.className = confirmVariant === 'primary'
+        ? 'px-4 py-2 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer'
+        : 'px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer';
+
+      execBtn.onclick = () => {
+        closeConfirmModal();
+        if (typeof onConfirm === 'function') onConfirm();
+      };
+
+      document.getElementById('modal-confirm').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('modal-confirm').classList.add('hidden');
+    }
+
+    function confirmDeleteKader(regSeq) {
+      const kader = kaderList.find(k => Number(k.reg_seq) === Number(regSeq));
+      if (!kader) return;
+
+      openConfirmModal({
+        title: 'Hapus Data Kader',
+        message: `Apakah Anda yakin ingin menghapus data kader "${kader.nama_lengkap}" (${kader.id_kader}) dari database SIKAD?`,
+        confirmText: 'Ya, Hapus Kader',
+        onConfirm: async () => {
+          try {
+            await deleteRowFromSupabaseAndBackup(makeKaderDbId(regSeq));
+            kaderList = kaderList.filter(k => Number(k.reg_seq) !== Number(regSeq));
+            saveFallbackToLocalStorage();
+            refreshAllViews();
+            showToast(`Data kader ${kader.nama_lengkap} berhasil dihapus.`, 'success');
+          } catch (err) {
+            showToast(`Gagal menghapus data kader: ${err.message}`, 'error');
+          }
+        }
+      });
+    }
+
+    function confirmDeleteMasterItem(id) {
+      const plt = pelatihanList.find(p => p.id === id);
+      if (!plt) return;
+
+      openConfirmModal({
+        title: 'Hapus Program Daurah / Pelatihan',
+        message: `Menghapus "[${plt.kode}] ${plt.nama}" juga akan menghapus riwayat pelatihan ini dari seluruh profil kader terkait. Lanjutkan?`,
+        confirmText: 'Ya, Hapus Pelatihan',
+        onConfirm: async () => {
+          try {
+            const nowIso = new Date().toISOString();
+            const affectedKaderRows = [];
+
+            const updatedKaderList = kaderList.map(k => {
+              const hasPlt = Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(id);
+              if (!hasPlt) return k;
+              const updatedK = {
+                ...k,
+                pelatihan_ids: k.pelatihan_ids.filter(pid => pid !== id)
+              };
+              affectedKaderRows.push({
+                id: makeKaderDbId(updatedK.reg_seq),
+                tipe_data: 'kader',
+                payload: updatedK,
+                updated_at: nowIso
+              });
+              return updatedK;
+            });
+
+            await deleteRowFromSupabaseAndBackup(id, affectedKaderRows);
+
+            pelatihanList = pelatihanList.filter(p => p.id !== id);
+            kaderList = updatedKaderList;
+            saveFallbackToLocalStorage();
+
+            if (document.getElementById('master-edit-id').value === id) {
+              resetMasterForm();
+            }
+
+            refreshAllViews();
+            showToast(`Program "[${plt.kode}] ${plt.nama}" berhasil dihapus.`, 'success');
+          } catch (err) {
+            showToast(`Gagal menghapus pelatihan: ${err.message}`, 'error');
+          }
+        }
+      });
+    }
+
+    function confirmResetSampleData() {
+      openConfirmModal({
+        title: 'Reset Data Contoh SIKAD',
+        message: 'Seluruh data akan dikembalikan ke 18 data contoh kader se-6 DPD Sulawesi Barat dan 6 data master daurah/pelatihan awal. Lanjutkan?',
+        confirmText: 'Ya, Reset Data',
+        onConfirm: async () => {
+          try {
+            cloneDefaultData();
+            const sampleRows = buildRowsFromCurrentState();
+            await upsertRowsToSupabaseAndBackup(sampleRows);
+            resetDirektoriFilter();
+            resetMasterForm();
+            refreshAllViews();
+            showToast('Database dipulihkan ke 18 kader contoh & 6 master pelatihan.', 'success');
+          } catch (err) {
+            showToast(`Gagal mereset data contoh: ${err.message}`, 'error');
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 15. INISIALISASI SAAT APLIKASI DIBUKA
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshGithubBackupIndicator();
+      setInterval(() => refreshGithubBackupIndicator(), 30000);
+      loadInitialData();
+      navigateTo('dashboard');
+    });
+  </script>
+</body>
+</html>

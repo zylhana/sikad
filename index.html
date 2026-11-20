@@ -172,7 +172,7 @@
             <span class="w-2 h-2 rounded-full bg-teal-300"></span>
             <span>Arsitektur Dual-Sync</span>
           </div>
-          <p class="text-[11px] text-white/75 leading-relaxed">Supabase Database Utama & Auto-Backup JSON ke GitHub.</p>
+          <p class="text-[11px] text-white/75 leading-relaxed"> Database Utama & Auto-Backup JSON ke GitHub.</p>
         </div>
 
         <button type="button" onclick="openGithubSettingsModal()" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-xs font-bold transition-all cursor-pointer">
@@ -228,13 +228,13 @@
             </button>
           </div>
 
-          <!-- Baris Kanan Header: 2 Indikator Status (Supabase & Backup GitHub) + Tombol Restore & Registrasi -->
+          <!-- Baris Kanan Header: 2 Indikator Status ( & Backup GitHub) + Tombol Restore & Registrasi -->
           <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
 
-            <!-- Indikator 1: Status Koneksi Supabase -->
-            <div id="status-supabase-badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold">
-              <span id="status-supabase-dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-              <span id="status-supabase-text">Supabase: Belum Dikonfigurasi</span>
+            <!-- Indikator 1: Status Koneksi  -->
+            <div id="status--badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold">
+              <span id="status--dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+              <span id="status--text">Supabase: Belum Dikonfigurasi</span>
             </div>
 
             <!-- Indikator 2: Waktu Terakhir Berhasil Backup ke GitHub -->
@@ -1031,8 +1031,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     // =========================================================================
     // 1. KONFIGURASI SUPABASE & KONSTANTA STORAGE
     // =========================================================================
-    const SUPABASE_URL = "[TEMPEL_PROJECT_URL]";
-    const SUPABASE_ANON_KEY = "[TEMPEL_ANON_KEY]";
+    const SUPABASE_URL = "[https://zrpfcotcvbnmzvbtwyxr.supabase.co/rest/v1/]";
+    const SUPABASE_ANON_KEY = "[sb_publishable_gYCqrPIWJ3a2ZBS-v1-axw_UDwjmVZ5]";
     const SUPABASE_TABLE = "data_utama";
 
     const STORAGE_KEYS = {

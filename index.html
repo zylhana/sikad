@@ -19,6 +19,9 @@
   <!-- Supabase JS SDK v2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- SheetJS (XLSX) CDN untuk Template & Import Excel Massal -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -172,7 +175,7 @@
             <span class="w-2 h-2 rounded-full bg-teal-300"></span>
             <span>Arsitektur Dual-Sync</span>
           </div>
-          <p class="text-[11px] text-white/75 leading-relaxed"> Database Utama & Auto-Backup JSON ke GitHub.</p>
+          <p class="text-[11px] text-white/75 leading-relaxed">Supabase Database Utama & Auto-Backup JSON ke GitHub.</p>
         </div>
 
         <button type="button" onclick="openGithubSettingsModal()" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-xs font-bold transition-all cursor-pointer">
@@ -228,10 +231,10 @@
             </button>
           </div>
 
-          <!-- Baris Kanan Header: 2 Indikator Status ( & Backup GitHub) + Tombol Restore & Registrasi -->
+          <!-- Baris Kanan Header: 2 Indikator Status (Supabase & Backup GitHub) + Tombol Restore & Registrasi -->
           <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
 
-           <!-- Indikator 1: Status Koneksi Supabase -->
+            <!-- Indikator 1: Status Koneksi Supabase -->
             <div id="status-supabase-badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold">
               <span id="status-supabase-dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
               <span id="status-supabase-text">Supabase: Belum Dikonfigurasi</span>
@@ -271,6 +274,47 @@
           <!-- LAMAN 1: DASHBOARD ANALITIK                                     -->
           <!-- =============================================================== -->
           <section id="page-dashboard" class="space-y-6">
+
+            <!-- Bar Filter Dashboard Analitik (Filter per DPD & per Marhalah) -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#d5e0d9] shadow-xs flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3.5">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-teal-sage-gradient"></span>
+                  <h3 class="text-sm font-extrabold text-slate-900">Filter Statistik & Grafik Dashboard</h3>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Menampilkan statistik untuk <strong id="dashboard-filter-summary" class="text-[#0f766e]">Semua DPD & Semua Marhalah (0 kader)</strong>
+                </p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2.5">
+                <!-- Filter DPD -->
+                <select id="dashboard-filter-dpd" onchange="renderDashboard()" aria-label="Filter Dashboard per DPD" class="px-3.5 py-2 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                  <option value="ALL">Semua DPD (6 Kab. Sulbar)</option>
+                  <option value="DPD Mamuju">DPD Mamuju</option>
+                  <option value="DPD Majene">DPD Majene</option>
+                  <option value="DPD Polewali Mandar">DPD Polewali Mandar</option>
+                  <option value="DPD Mamasa">DPD Mamasa</option>
+                  <option value="DPD Pasangkayu">DPD Pasangkayu</option>
+                  <option value="DPD Mamuju Tengah">DPD Mamuju Tengah</option>
+                </select>
+
+                <!-- Filter Marhalah -->
+                <select id="dashboard-filter-marhalah" onchange="renderDashboard()" aria-label="Filter Dashboard per Marhalah" class="px-3.5 py-2 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                  <option value="ALL">Semua Jenjang Marhalah</option>
+                  <option value="Pra-Ta'rif">Pra-Ta'rif (PT)</option>
+                  <option value="Ta'rif 1">Ta'rif 1 (T1)</option>
+                  <option value="Ta'rif 2">Ta'rif 2 (T2)</option>
+                  <option value="Takwin 1">Takwin 1 (TK1)</option>
+                  <option value="Takwin 2">Takwin 2 (TK2)</option>
+                  <option value="Tanfidz">Tanfidz (TF)</option>
+                </select>
+
+                <button type="button" id="btn-reset-dashboard-filter" onclick="resetDashboardFilter()" class="hidden px-3.5 py-2 rounded-xl bg-[#e6eee9] hover:bg-[#d5e3db] text-[#0f766e] border border-[#b8cdc1] text-xs font-bold transition-colors cursor-pointer">
+                  Reset Filter
+                </button>
+              </div>
+            </div>
 
             <!-- 4 Kartu KPI Utama -->
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -428,11 +472,17 @@
                 <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Klik tombol <strong class="text-[#0f766e]">Detail</strong> pada setiap baris kader untuk melihat biodata lengkap & riwayat daurah/pelatihan.</p>
               </div>
               <div class="flex flex-wrap items-center gap-2.5">
-                <button type="button" onclick="exportKaderCSV()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#e6eee9] text-[#2f5245] border border-[#b8cdc1] font-bold text-xs sm:text-sm shadow-2xs transition-colors cursor-pointer">
+                <button type="button" onclick="exportKaderCSV()" class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white hover:bg-[#e6eee9] text-[#2f5245] border border-[#b8cdc1] font-bold text-xs sm:text-sm shadow-2xs transition-colors cursor-pointer">
                   <svg class="w-4 h-4 text-[#0f766e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span>Ekspor CSV</span>
+                </button>
+                <button type="button" onclick="openBulkImportModal()" class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#e6eee9] hover:bg-[#d5e3db] text-[#0f766e] border border-[#9eb9aa] font-bold text-xs sm:text-sm shadow-2xs transition-colors cursor-pointer">
+                  <svg class="w-4 h-4 text-[#0f766e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Import Excel (Massal)</span>
                 </button>
                 <button type="button" onclick="openKaderFormModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white font-bold text-xs sm:text-sm shadow-sm transition-colors cursor-pointer">
                   <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -966,7 +1016,7 @@
             <div class="flex items-center justify-between gap-2">
               <div>
                 <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#0f766e]">Skema Tabel Supabase ("data_utama")</h4>
-                <p class="text-[11px] text-slate-500">Jalankan SQL berikut pada SQL Editor proyek Supabase Anda, lalu isi <code class="font-mono"></code> & <code class="font-mono">SUPABASE_ANON_KEY</code> di bagian atas skrip.</p>
+                <p class="text-[11px] text-slate-500">Jalankan SQL berikut pada SQL Editor proyek Supabase Anda, lalu isi <code class="font-mono">SUPABASE_URL</code> & <code class="font-mono">SUPABASE_ANON_KEY</code> di bagian atas skrip.</p>
               </div>
               <button type="button" onclick="copySupabaseSqlSnippet()" class="px-3 py-1.5 rounded-lg bg-[#e6eee9] hover:bg-[#d5e3db] text-[#0f766e] border border-[#b8cdc1] text-xs font-bold shrink-0 cursor-pointer">
                 Salin SQL
@@ -1025,6 +1075,122 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
   </div>
 
   <!-- ======================================================================= -->
+  <!-- MODAL 5: TAMBAH KADER MASSAL VIA EXCEL (.XLSX)                          -->
+  <!-- ======================================================================= -->
+  <div id="modal-bulk-import" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="bulk-import-title">
+    <div class="min-h-screen px-4 py-6 flex items-center justify-center">
+      <div onclick="closeBulkImportModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+
+      <div class="relative bg-white rounded-2xl max-w-4xl w-full shadow-2xl border border-[#d5e0d9] overflow-hidden z-10">
+
+        <!-- Header Modal (Gradient Teal & Sage) -->
+        <div class="bg-teal-sage-gradient px-6 py-4 text-white flex items-center justify-between gap-3">
+          <div>
+            <h3 id="bulk-import-title" class="text-base sm:text-lg font-extrabold">Tambah Kader Massal (Import File Excel)</h3>
+            <p class="text-xs text-white/85">Unduh template resmi SIKAD, isi data kader, lalu unggah untuk validasi & penyimpanan otomatis</p>
+          </div>
+          <button type="button" onclick="closeBulkImportModal()" class="p-2 rounded-xl text-white/80 hover:bg-white/15 hover:text-white cursor-pointer" aria-label="Tutup Import Excel">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Body Modal -->
+        <div class="p-6 space-y-5 max-h-[82vh] overflow-y-auto">
+
+          <!-- Langkah 1 & Langkah 2 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- Langkah 1: Unduh Template Excel -->
+            <div class="p-4 rounded-2xl bg-[#f4f7f5] border border-[#cddcd3] flex flex-col justify-between gap-3">
+              <div class="space-y-1.5">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#e6eee9] text-[#0f766e] border border-[#b8cdc1]">Langkah 1</span>
+                <h4 class="text-sm font-extrabold text-slate-900">Unduh Template Excel (.xlsx)</h4>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  Template sudah dilengkapi contoh pengisian, daftar DPD & Marhalah valid, serta daftar kode Daurah/Pelatihan dari laman Master.
+                </p>
+              </div>
+              <button type="button" onclick="downloadExcelTemplate()" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#e6eee9] text-[#0f766e] border border-[#9eb9aa] text-xs sm:text-sm font-bold shadow-2xs transition-colors cursor-pointer">
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Unduh Template_Kader_SIKAD.xlsx</span>
+              </button>
+            </div>
+
+            <!-- Langkah 2: Unggah File Excel -->
+            <div class="p-4 rounded-2xl bg-[#f4f7f5] border border-[#cddcd3] flex flex-col justify-between gap-3">
+              <div class="space-y-1.5">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#e6eee9] text-[#0f766e] border border-[#b8cdc1]">Langkah 2</span>
+                <h4 class="text-sm font-extrabold text-slate-900">Unggah File Excel yang Sudah Diisi</h4>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  Sistem otomatis memvalidasi nomor WhatsApp ganda dan membuatkan Nomor Induk Kader <code class="font-mono font-bold text-[#0b4f4a]">WI-(kode)-(4 digit)</code>.
+                </p>
+              </div>
+              <label for="bulk-excel-file" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white text-xs sm:text-sm font-bold shadow-sm transition-colors cursor-pointer">
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span id="bulk-file-label">Pilih File Excel (.xlsx / .xls)</span>
+              </label>
+              <input type="file" id="bulk-excel-file" accept=".xlsx,.xls,.csv" onchange="handleBulkExcelFileChange(event)" class="hidden" />
+            </div>
+
+          </div>
+
+          <!-- Ringkasan & Tabel Pratinjau Validasi -->
+          <div id="bulk-preview-section" class="hidden space-y-3 pt-2 border-t border-[#d5e0d9]">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 font-bold">Total Baris: <strong id="bulk-stat-total">0</strong></span>
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold">Valid Siap Impor: <strong id="bulk-stat-valid">0</strong></span>
+                <span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-900 border border-rose-300 font-bold">Bermasalah / Dilewati: <strong id="bulk-stat-invalid">0</strong></span>
+              </div>
+              <button type="button" onclick="resetBulkImportPreview()" class="text-xs font-bold text-[#0f766e] hover:underline cursor-pointer">
+                Bersihkan Pratinjau
+              </button>
+            </div>
+
+            <div class="border border-[#d5e0d9] rounded-xl overflow-hidden">
+              <div class="overflow-x-auto max-h-72">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead class="sticky top-0 z-10">
+                    <tr class="bg-table-header-gradient text-white text-[11px] font-bold uppercase tracking-wider">
+                      <th class="py-2.5 px-3">Baris</th>
+                      <th class="py-2.5 px-3 whitespace-nowrap">No. Induk (Otomatis)</th>
+                      <th class="py-2.5 px-3">Nama Lengkap</th>
+                      <th class="py-2.5 px-3">DPD / DPC</th>
+                      <th class="py-2.5 px-3">Marhalah</th>
+                      <th class="py-2.5 px-3">No. WhatsApp</th>
+                      <th class="py-2.5 px-3">Status Validasi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bulk-preview-tbody" class="divide-y divide-[#e6eee9]">
+                    <!-- Diisi dinamis oleh JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer Modal -->
+        <div class="px-6 py-4 bg-[#f4f7f5] border-t border-[#d5e0d9] flex flex-wrap items-center justify-between gap-3">
+          <button type="button" onclick="closeBulkImportModal()" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-[#cddcd3] font-bold text-xs sm:text-sm transition-colors cursor-pointer">
+            Batal
+          </button>
+          <button type="button" id="btn-execute-bulk-import" onclick="executeBulkImport()" disabled class="px-5 py-2.5 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover disabled:opacity-45 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer">
+            Simpan & Impor Kader Valid
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
   <!-- JAVASCRIPT UTAMA SIKAD (DUAL-SYNC: SUPABASE + GITHUB REST API)          -->
   <!-- ======================================================================= -->
   <script>
@@ -1053,15 +1219,73 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       'DPD Mamuju Tengah'
     ];
 
-    // Kode Marhalah sesuai aturan: PT, T1, T2, TK1, TK2, TF
-    const MARHALAH_LIST = [
-      { label: "Pra-Ta'rif", code: 'PT', color: '#84a98c' },
-      { label: "Ta'rif 1", code: 'T1', color: '#7c9a82' },
-      { label: "Ta'rif 2", code: 'T2', color: '#5f8575' },
-      { label: 'Takwin 1', code: 'TK1', color: '#14b8a6' },
-      { label: 'Takwin 2', code: 'TK2', color: '#0d9488' },
-      { label: 'Tanfidz', code: 'TF', color: '#0f766e' }
+    // Palet warna berbeda untuk setiap DPD pada grafik agar mudah dibedakan
+    const DPD_COLORS = [
+      '#0d9488', // DPD Mamuju (Teal)
+      '#2563eb', // DPD Majene (Biru)
+      '#d97706', // DPD Polewali Mandar (Amber)
+      '#7c3aed', // DPD Mamasa (Ungu)
+      '#e11d48', // DPD Pasangkayu (Merah Rose)
+      '#059669'  // DPD Mamuju Tengah (Emerald)
     ];
+
+    // Palet warna berbeda untuk grafik Daurah & Pelatihan
+    const PELATIHAN_COLORS = [
+      '#0d9488',
+      '#2563eb',
+      '#d97706',
+      '#9333ea',
+      '#e11d48',
+      '#059669',
+      '#0284c7',
+      '#ea580c',
+      '#4f46e5',
+      '#db2777'
+    ];
+
+    // Kode & warna berbeda untuk 6 Jenjang Marhalah (Grafik & Direktori Kader)
+    const MARHALAH_LIST = [
+      {
+        label: "Pra-Ta'rif",
+        code: 'PT',
+        color: '#64748b',
+        badgeClass: 'bg-slate-100 text-slate-800 border border-slate-300'
+      },
+      {
+        label: "Ta'rif 1",
+        code: 'T1',
+        color: '#0284c7',
+        badgeClass: 'bg-sky-100 text-sky-800 border border-sky-300'
+      },
+      {
+        label: "Ta'rif 2",
+        code: 'T2',
+        color: '#4f46e5',
+        badgeClass: 'bg-indigo-100 text-indigo-800 border border-indigo-300'
+      },
+      {
+        label: 'Takwin 1',
+        code: 'TK1',
+        color: '#d97706',
+        badgeClass: 'bg-amber-100 text-amber-800 border border-amber-300'
+      },
+      {
+        label: 'Takwin 2',
+        code: 'TK2',
+        color: '#9333ea',
+        badgeClass: 'bg-purple-100 text-purple-800 border border-purple-300'
+      },
+      {
+        label: 'Tanfidz',
+        code: 'TF',
+        color: '#059669',
+        badgeClass: 'bg-emerald-100 text-emerald-900 border border-emerald-400'
+      }
+    ];
+
+    function getMarhalahMeta(marhalahLabel) {
+      return MARHALAH_LIST.find(m => m.label === marhalahLabel) || MARHALAH_LIST[0];
+    }
 
     // =========================================================================
     // 2. DATA CONTOH BAWAAN (6 MASTER PELATIHAN & 18 KADER SULAWESI BARAT)
@@ -1367,7 +1591,290 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     ];
 
     // =========================================================================
-    // 3. STATE APLIKASI & INISIALISASI CLIENT SUPABASE
+    // 10. LAMAN 1: DASHBOARD ANALITIK (MULTI-WARNA & FILTER DPD / MARHALAH)
+    // =========================================================================
+    function destroyChartSafely(instance) {
+      if (instance && typeof instance.destroy === 'function') {
+        try {
+          instance.destroy();
+        } catch (err) {
+          console.warn('Peringatan saat destroy Chart.js:', err);
+        }
+      }
+      return null;
+    }
+
+    function getDashboardFilteredKader() {
+      const selectedDpd = document.getElementById('dashboard-filter-dpd')?.value || 'ALL';
+      const selectedMarhalah = document.getElementById('dashboard-filter-marhalah')?.value || 'ALL';
+
+      return kaderList.filter(k => {
+        const matchDpd = selectedDpd === 'ALL' || k.dpd === selectedDpd;
+        const matchMarhalah = selectedMarhalah === 'ALL' || k.marhalah === selectedMarhalah;
+        return matchDpd && matchMarhalah;
+      });
+    }
+
+    function resetDashboardFilter() {
+      const dpdSel = document.getElementById('dashboard-filter-dpd');
+      const mrhSel = document.getElementById('dashboard-filter-marhalah');
+      if (dpdSel) dpdSel.value = 'ALL';
+      if (mrhSel) mrhSel.value = 'ALL';
+      renderDashboard();
+    }
+
+    function updateDashboardMetricsOnly() {
+      const selectedDpd = document.getElementById('dashboard-filter-dpd')?.value || 'ALL';
+      const selectedMarhalah = document.getElementById('dashboard-filter-marhalah')?.value || 'ALL';
+      const filtered = getDashboardFilteredKader();
+
+      // Update indikator ringkasan filter & tombol reset
+      const summaryEl = document.getElementById('dashboard-filter-summary');
+      const resetBtn = document.getElementById('btn-reset-dashboard-filter');
+      const isFiltered = selectedDpd !== 'ALL' || selectedMarhalah !== 'ALL';
+
+      if (summaryEl) {
+        const dpdLabel = selectedDpd === 'ALL' ? 'Semua DPD' : selectedDpd;
+        const mrhLabel = selectedMarhalah === 'ALL' ? 'Semua Marhalah' : `Marhalah ${selectedMarhalah}`;
+        summaryEl.textContent = `${dpdLabel} • ${mrhLabel} (${filtered.length} kader)`;
+      }
+      if (resetBtn) {
+        if (isFiltered) resetBtn.classList.remove('hidden');
+        else resetBtn.classList.add('hidden');
+      }
+
+      const total = filtered.length;
+      const aktifCount = filtered.filter(k => k.status === 'Aktif').length;
+      const kurangAktifCount = filtered.filter(k => k.status === 'Kurang Aktif').length;
+      const ikhwanCount = filtered.filter(k => k.jenis_kelamin === 'Ikhwan').length;
+      const akhwatCount = filtered.filter(k => k.jenis_kelamin === 'Akhwat').length;
+
+      const aktifPct = total > 0 ? ((aktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
+      const kurangAktifPct = total > 0 ? ((kurangAktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
+
+      document.getElementById('kpi-total-kader').textContent = total;
+      document.getElementById('kpi-gender-sub').textContent = `${ikhwanCount} Ikhwan • ${akhwatCount} Akhwat`;
+      document.getElementById('kpi-kader-aktif').textContent = aktifCount;
+      document.getElementById('kpi-kader-aktif-pct').textContent = `${aktifPct}%`;
+      document.getElementById('kpi-kader-kurang-aktif').textContent = kurangAktifCount;
+      document.getElementById('kpi-kader-kurang-aktif-pct').textContent = `${kurangAktifPct}%`;
+      document.getElementById('kpi-total-pelatihan').textContent = pelatihanList.length;
+
+      // Ringkasan 6 DPD Sulawesi Barat (berdasarkan data terfilter)
+      const dpdListEl = document.getElementById('dpd-breakdown-list');
+      if (dpdListEl) {
+        dpdListEl.innerHTML = DPD_LIST.map((dpdName, idx) => {
+          const count = filtered.filter(k => k.dpd === dpdName).length;
+          const shortName = dpdName.replace('DPD ', '');
+          const dotColor = DPD_COLORS[idx % DPD_COLORS.length];
+          return `
+            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${dotColor};"></span>
+                <span class="font-semibold text-slate-700 truncate">${escapeHtml(shortName)}</span>
+              </div>
+              <span class="font-extrabold text-slate-900 tabular-nums ml-1.5">${count}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Rincian 6 Jenjang Marhalah (berdasarkan data terfilter)
+      const marhalahListEl = document.getElementById('marhalah-breakdown-list');
+      if (marhalahListEl) {
+        marhalahListEl.innerHTML = MARHALAH_LIST.map(m => {
+          const count = filtered.filter(k => k.marhalah === m.label).length;
+          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+          return `
+            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${m.color};"></span>
+                <span class="font-bold text-slate-800 truncate">${escapeHtml(m.label)}</span>
+                <span class="font-mono text-[10px] text-slate-500">(${m.code})</span>
+              </div>
+              <span class="font-extrabold text-slate-900 tabular-nums ml-1">${count} <span class="font-normal text-slate-400">(${pct}%)</span></span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Progress Bar Statistik Partisipasi Daurah & Pelatihan (berdasarkan data terfilter)
+      const progressListEl = document.getElementById('pelatihan-progress-list');
+      if (progressListEl) {
+        if (pelatihanList.length === 0) {
+          progressListEl.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada program pelatihan terdaftar pada laman Master.</p>`;
+        } else {
+          progressListEl.innerHTML = pelatihanList.map((plt, idx) => {
+            const count = filtered.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(plt.id)).length;
+            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            const barColor = PELATIHAN_COLORS[idx % PELATIHAN_COLORS.length];
+            return `
+              <div class="space-y-1">
+                <div class="flex items-center justify-between gap-2 text-xs">
+                  <span class="font-bold text-slate-800 truncate flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${barColor};"></span>
+                    <span class="font-mono" style="color: ${barColor};">[${escapeHtml(plt.kode)}]</span>
+                    <span class="truncate">${escapeHtml(plt.nama)}</span>
+                  </span>
+                  <span class="font-extrabold text-slate-900 whitespace-nowrap tabular-nums">${count}/${total} (${pct}%)</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-[#e6eee9] overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-300" style="width: ${pct}%; background-color: ${barColor};"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    }
+
+    function renderDashboard() {
+      updateDashboardMetricsOnly();
+
+      if (typeof window.Chart === 'undefined') return;
+
+      const filtered = getDashboardFilteredKader();
+
+      // 1. Grafik Batang Multi-Warna: Sebaran Total Kader per DPD
+      const dpdCanvas = document.getElementById('chart-dpd');
+      if (dpdCanvas) {
+        chartDpdInstance = destroyChartSafely(chartDpdInstance);
+        const dpdLabels = DPD_LIST.map(d => d.replace('DPD ', ''));
+        const dpdCounts = DPD_LIST.map(d => filtered.filter(k => k.dpd === d).length);
+
+        chartDpdInstance = new Chart(dpdCanvas, {
+          type: 'bar',
+          data: {
+            labels: dpdLabels,
+            datasets: [
+              {
+                label: 'Jumlah Kader',
+                data: dpdCounts,
+                backgroundColor: DPD_COLORS,
+                borderRadius: 8,
+                maxBarThickness: 44
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: (items) => 'DPD ' + items[0].label,
+                  label: (ctx) => ` Total Kader: ${ctx.parsed.y} orang`
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
+                grid: { color: '#e6eee9' }
+              },
+              x: {
+                ticks: { color: '#334155', font: { size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Grafik Donat Multi-Warna: Jumlah Kader Berdasarkan 6 Jenjang Marhalah
+      const marhalahCanvas = document.getElementById('chart-marhalah');
+      if (marhalahCanvas) {
+        chartMarhalahInstance = destroyChartSafely(chartMarhalahInstance);
+        const mLabels = MARHALAH_LIST.map(m => `${m.label} (${m.code})`);
+        const mCounts = MARHALAH_LIST.map(m => filtered.filter(k => k.marhalah === m.label).length);
+        const mColors = MARHALAH_LIST.map(m => m.color);
+        const hasAnyData = mCounts.some(c => c > 0);
+
+        chartMarhalahInstance = new Chart(marhalahCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: hasAnyData ? mLabels : ['Belum ada data sesuai filter'],
+            datasets: [
+              {
+                data: hasAnyData ? mCounts : [1],
+                backgroundColor: hasAnyData ? mColors : ['#e2e8f0'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => hasAnyData ? ` ${ctx.label}: ${ctx.parsed} kader` : ' 0 kader sesuai filter'
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // 3. Grafik Batang Horizontal Multi-Warna: Statistik Partisipasi Daurah & Pelatihan
+      const pelatihanCanvas = document.getElementById('chart-pelatihan');
+      if (pelatihanCanvas) {
+        chartPelatihanInstance = destroyChartSafely(chartPelatihanInstance);
+        const pLabels = pelatihanList.map(p => `[${p.kode}] ${p.nama}`);
+        const pCounts = pelatihanList.map(p =>
+          filtered.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(p.id)).length
+        );
+        const pColors = pelatihanList.map((_, idx) => PELATIHAN_COLORS[idx % PELATIHAN_COLORS.length]);
+
+        chartPelatihanInstance = new Chart(pelatihanCanvas, {
+          type: 'bar',
+          data: {
+            labels: pLabels,
+            datasets: [
+              {
+                label: 'Kader Peserta',
+                data: pCounts,
+                backgroundColor: pColors,
+                borderRadius: 6,
+                barThickness: 20
+              }
+            ]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => ` Telah diikuti oleh ${ctx.parsed.x} kader`
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
+                grid: { color: '#e6eee9' }
+              },
+              y: {
+                ticks: { color: '#1e293b', font: { size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // =========================================================================
+    // 11. LAMAN 2: DIREKTORI KADER (BADGE MARHALAH BERBEDA WARNA & DETAIL)
     // =========================================================================
     let supabaseClient = null;
     let isSupabaseConfigured = false;
@@ -1381,7 +1888,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     let chartMarhalahInstance = null;
     let chartPelatihanInstance = null;
 
-function initSupabaseClient() {
+    function initSupabaseClient() {
       const urlValid = typeof SUPABASE_URL === 'string' &&
         SUPABASE_URL.trim() !== '' &&
         !SUPABASE_URL.includes('[TEMPEL_PROJECT_URL]') &&
@@ -2178,241 +2685,6 @@ function initSupabaseClient() {
     }
 
     // =========================================================================
-    // 10. LAMAN 1: DASHBOARD ANALITIK (CHART.JS TEAL & SAGE GREEN)
-    // =========================================================================
-    function destroyChartSafely(instance) {
-      if (instance && typeof instance.destroy === 'function') {
-        try {
-          instance.destroy();
-        } catch (err) {
-          console.warn('Peringatan saat destroy Chart.js:', err);
-        }
-      }
-      return null;
-    }
-
-    function updateDashboardMetricsOnly() {
-      const total = kaderList.length;
-      const aktifCount = kaderList.filter(k => k.status === 'Aktif').length;
-      const kurangAktifCount = kaderList.filter(k => k.status === 'Kurang Aktif').length;
-      const ikhwanCount = kaderList.filter(k => k.jenis_kelamin === 'Ikhwan').length;
-      const akhwatCount = kaderList.filter(k => k.jenis_kelamin === 'Akhwat').length;
-
-      const aktifPct = total > 0 ? ((aktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
-      const kurangAktifPct = total > 0 ? ((kurangAktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
-
-      document.getElementById('kpi-total-kader').textContent = total;
-      document.getElementById('kpi-gender-sub').textContent = `${ikhwanCount} Ikhwan • ${akhwatCount} Akhwat`;
-      document.getElementById('kpi-kader-aktif').textContent = aktifCount;
-      document.getElementById('kpi-kader-aktif-pct').textContent = `${aktifPct}%`;
-      document.getElementById('kpi-kader-kurang-aktif').textContent = kurangAktifCount;
-      document.getElementById('kpi-kader-kurang-aktif-pct').textContent = `${kurangAktifPct}%`;
-      document.getElementById('kpi-total-pelatihan').textContent = pelatihanList.length;
-
-      // Ringkasan 6 DPD Sulawesi Barat
-      const dpdListEl = document.getElementById('dpd-breakdown-list');
-      if (dpdListEl) {
-        dpdListEl.innerHTML = DPD_LIST.map(dpdName => {
-          const count = kaderList.filter(k => k.dpd === dpdName).length;
-          const shortName = dpdName.replace('DPD ', '');
-          return `
-            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
-              <span class="font-semibold text-slate-700 truncate">${escapeHtml(shortName)}</span>
-              <span class="font-extrabold text-[#0f766e] tabular-nums ml-1.5">${count}</span>
-            </div>
-          `;
-        }).join('');
-      }
-
-      // Rincian 6 Jenjang Marhalah
-      const marhalahListEl = document.getElementById('marhalah-breakdown-list');
-      if (marhalahListEl) {
-        marhalahListEl.innerHTML = MARHALAH_LIST.map(m => {
-          const count = kaderList.filter(k => k.marhalah === m.label).length;
-          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-          return `
-            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
-              <div class="flex items-center gap-2 min-w-0">
-                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${m.color};"></span>
-                <span class="font-bold text-slate-800 truncate">${escapeHtml(m.label)}</span>
-                <span class="font-mono text-[10px] text-[#5f8575]">(${m.code})</span>
-              </div>
-              <span class="font-extrabold text-slate-900 tabular-nums ml-1">${count} <span class="font-normal text-slate-400">(${pct}%)</span></span>
-            </div>
-          `;
-        }).join('');
-      }
-
-      // Progress Bar Statistik Partisipasi Daurah & Pelatihan
-      const progressListEl = document.getElementById('pelatihan-progress-list');
-      if (progressListEl) {
-        if (pelatihanList.length === 0) {
-          progressListEl.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada program pelatihan terdaftar pada laman Master.</p>`;
-        } else {
-          progressListEl.innerHTML = pelatihanList.map(plt => {
-            const count = kaderList.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(plt.id)).length;
-            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-            return `
-              <div class="space-y-1">
-                <div class="flex items-center justify-between gap-2 text-xs">
-                  <span class="font-bold text-slate-800 truncate">
-                    <span class="font-mono text-[#0f766e]">[${escapeHtml(plt.kode)}]</span> ${escapeHtml(plt.nama)}
-                  </span>
-                  <span class="font-extrabold text-[#0b4f4a] whitespace-nowrap tabular-nums">${count}/${total} (${pct}%)</span>
-                </div>
-                <div class="w-full h-2 rounded-full bg-[#e6eee9] overflow-hidden">
-                  <div class="h-full rounded-full bg-progress-gradient transition-all duration-300" style="width: ${pct}%"></div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      }
-    }
-
-    function renderDashboard() {
-      updateDashboardMetricsOnly();
-
-      if (typeof window.Chart === 'undefined') return;
-
-      // 1. Grafik Batang: Sebaran Total Kader per DPD (Palet Teal & Sage Green)
-      const dpdCanvas = document.getElementById('chart-dpd');
-      if (dpdCanvas) {
-        chartDpdInstance = destroyChartSafely(chartDpdInstance);
-        const dpdLabels = DPD_LIST.map(d => d.replace('DPD ', ''));
-        const dpdCounts = DPD_LIST.map(d => kaderList.filter(k => k.dpd === d).length);
-
-        chartDpdInstance = new Chart(dpdCanvas, {
-          type: 'bar',
-          data: {
-            labels: dpdLabels,
-            datasets: [
-              {
-                label: 'Jumlah Kader',
-                data: dpdCounts,
-                backgroundColor: ['#0f766e', '#0d9488', '#3f7368', '#5f8575', '#7c9a82', '#84a98c'],
-                borderRadius: 8,
-                maxBarThickness: 44
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  title: (items) => 'DPD ' + items[0].label,
-                  label: (ctx) => ` Total Kader: ${ctx.parsed.y} orang`
-                }
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
-                grid: { color: '#e6eee9' }
-              },
-              x: {
-                ticks: { color: '#334155', font: { size: 11, weight: '600' } },
-                grid: { display: false }
-              }
-            }
-          }
-        });
-      }
-
-      // 2. Grafik Donat: Jumlah Kader Berdasarkan 6 Jenjang Marhalah
-      const marhalahCanvas = document.getElementById('chart-marhalah');
-      if (marhalahCanvas) {
-        chartMarhalahInstance = destroyChartSafely(chartMarhalahInstance);
-        const mLabels = MARHALAH_LIST.map(m => `${m.label} (${m.code})`);
-        const mCounts = MARHALAH_LIST.map(m => kaderList.filter(k => k.marhalah === m.label).length);
-        const mColors = MARHALAH_LIST.map(m => m.color);
-
-        chartMarhalahInstance = new Chart(marhalahCanvas, {
-          type: 'doughnut',
-          data: {
-            labels: mLabels,
-            datasets: [
-              {
-                data: mCounts,
-                backgroundColor: mColors,
-                borderWidth: 2,
-                borderColor: '#ffffff'
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '62%',
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => ` ${ctx.label}: ${ctx.parsed} kader`
-                }
-              }
-            }
-          }
-        });
-      }
-
-      // 3. Grafik Batang Horizontal: Statistik Partisipasi Daurah & Pelatihan
-      const pelatihanCanvas = document.getElementById('chart-pelatihan');
-      if (pelatihanCanvas) {
-        chartPelatihanInstance = destroyChartSafely(chartPelatihanInstance);
-        const pLabels = pelatihanList.map(p => `[${p.kode}] ${p.nama}`);
-        const pCounts = pelatihanList.map(p =>
-          kaderList.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(p.id)).length
-        );
-
-        chartPelatihanInstance = new Chart(pelatihanCanvas, {
-          type: 'bar',
-          data: {
-            labels: pLabels,
-            datasets: [
-              {
-                label: 'Kader Peserta',
-                data: pCounts,
-                backgroundColor: '#0f766e',
-                hoverBackgroundColor: '#5f8575',
-                borderRadius: 6,
-                barThickness: 20
-              }
-            ]
-          },
-          options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => ` Telah diikuti oleh ${ctx.parsed.x} kader`
-                }
-              }
-            },
-            scales: {
-              x: {
-                beginAtZero: true,
-                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
-                grid: { color: '#e6eee9' }
-              },
-              y: {
-                ticks: { color: '#1e293b', font: { size: 11, weight: '600' } },
-                grid: { display: false }
-              }
-            }
-          }
-        });
-      }
-    }
-
-    // =========================================================================
     // 11. LAMAN 2: DIREKTORI KADER (TABEL RINGKAS, EKSPOR CSV, DETAIL MODAL)
     // =========================================================================
     function getFilteredKader() {
@@ -2472,6 +2744,12 @@ function initSupabaseClient() {
               <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Kurang Aktif
              </span>`;
 
+        const marhalahMeta = getMarhalahMeta(k.marhalah);
+        const marhalahBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold ${marhalahMeta.badgeClass}">
+          <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${marhalahMeta.color};"></span>
+          <span>${escapeHtml(k.marhalah)}</span>
+        </span>`;
+
         const waNormalized = normalizeWhatsApp(k.no_whatsapp);
 
         return `
@@ -2488,7 +2766,7 @@ function initSupabaseClient() {
               <div class="text-xs text-[#5f8575] mt-0.5">${escapeHtml(k.dpc || '-')}</div>
             </td>
             <td class="py-3.5 px-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-teal-sage-gradient text-white shadow-2xs">${escapeHtml(k.marhalah)}</span>
+              ${marhalahBadge}
             </td>
             <td class="py-3.5 px-4 whitespace-nowrap">
               <a href="https://wa.me/${escapeHtml(waNormalized)}" target="_blank" rel="noopener noreferrer" class="font-mono text-xs font-semibold text-[#0f766e] hover:text-[#0b4f4a] hover:underline">
@@ -2546,8 +2824,12 @@ function initSupabaseClient() {
         ? `${kader.tempat_lahir}, ${formatTanggalIndonesia(kader.tanggal_lahir)}`
         : formatTanggalIndonesia(kader.tanggal_lahir);
 
+      const marhalahMeta = getMarhalahMeta(kader.marhalah);
+      const detailMarhalahEl = document.getElementById('detail-marhalah');
+      detailMarhalahEl.className = `inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-extrabold mt-1 ${marhalahMeta.badgeClass}`;
+      detailMarhalahEl.innerHTML = `<span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${marhalahMeta.color};"></span><span>${escapeHtml(kader.marhalah)} (${marhalahMeta.code})</span>`;
+
       document.getElementById('detail-ttl').textContent = ttl;
-      document.getElementById('detail-marhalah').textContent = `${kader.marhalah} (${getMarhalahCode(kader.marhalah)})`;
       document.getElementById('detail-dpd-dpc').textContent = `${kader.dpd} — ${kader.dpc || '-'}`;
       document.getElementById('detail-profesi').textContent = kader.profesi || '-';
       document.getElementById('detail-alamat').textContent = kader.alamat || '-';
@@ -2873,6 +3155,362 @@ function initSupabaseClient() {
         refreshAllViews();
       } catch (err) {
         showToast(`Gagal menyimpan data kader: ${err.message}`, 'error');
+      }
+    }
+
+    // =========================================================================
+    // 12B. TAMBAH KADER MASSAL VIA EXCEL (.XLSX TEMPLATE & VALIDASI OTOMATIS)
+    // =========================================================================
+    let bulkParsedRows = [];
+
+    function openBulkImportModal() {
+      resetBulkImportPreview();
+      document.getElementById('modal-bulk-import').classList.remove('hidden');
+    }
+
+    function closeBulkImportModal() {
+      document.getElementById('modal-bulk-import').classList.add('hidden');
+    }
+
+    function resetBulkImportPreview() {
+      bulkParsedRows = [];
+      const fileInput = document.getElementById('bulk-excel-file');
+      if (fileInput) fileInput.value = '';
+      const fileLabel = document.getElementById('bulk-file-label');
+      if (fileLabel) fileLabel.textContent = 'Pilih File Excel (.xlsx / .xls)';
+      document.getElementById('bulk-preview-section').classList.add('hidden');
+      document.getElementById('bulk-preview-tbody').innerHTML = '';
+      document.getElementById('btn-execute-bulk-import').disabled = true;
+    }
+
+    function downloadExcelTemplate() {
+      if (typeof window.XLSX === 'undefined') {
+        showToast('Library Excel belum termuat. Periksa koneksi internet Anda.', 'error');
+        return;
+      }
+
+      const sampleKode1 = pelatihanList[0] ? pelatihanList[0].kode : 'DT-01';
+      const sampleKode2 = pelatihanList[1] ? `${sampleKode1}, ${pelatihanList[1].kode}` : sampleKode1;
+
+      const templateRows = [
+        {
+          'Nama Lengkap': 'Ust. Muhammad Yusuf, S.Pd.I.',
+          'Jenis Kelamin': 'Ikhwan',
+          'Tempat Lahir': 'Mamuju',
+          'Tanggal Lahir': '1991-07-15',
+          'No WhatsApp': '081242880101',
+          'DPD Domisili': 'DPD Mamuju',
+          'DPC Domisili': 'DPC Simboro',
+          'Alamat Domisili': 'Jl. Soekarno Hatta No. 10, Kel. Rangas',
+          'Profesi / Keahlian': 'Guru & Dai',
+          'Jenjang Marhalah': "Ta'rif 2",
+          'Status Kader': 'Aktif',
+          'Kode Pelatihan Diikuti': sampleKode2
+        },
+        {
+          'Nama Lengkap': 'Siti Fatimah Azzahra, S.Kep.',
+          'Jenis Kelamin': 'Akhwat',
+          'Tempat Lahir': 'Polewali',
+          'Tanggal Lahir': '1995-11-20',
+          'No WhatsApp': '085242880102',
+          'DPD Domisili': 'DPD Polewali Mandar',
+          'DPC Domisili': 'DPC Polewali',
+          'Alamat Domisili': 'Jl. Mr. Muh. Yamin No. 12, Kel. Pekkabata',
+          'Profesi / Keahlian': 'Perawat',
+          'Jenjang Marhalah': "Ta'rif 1",
+          'Status Kader': 'Aktif',
+          'Kode Pelatihan Diikuti': sampleKode1
+        }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      const wsTemplate = XLSX.utils.json_to_sheet(templateRows);
+      wsTemplate['!cols'] = [
+        { wch: 30 }, // Nama Lengkap
+        { wch: 15 }, // Jenis Kelamin
+        { wch: 18 }, // Tempat Lahir
+        { wch: 15 }, // Tanggal Lahir
+        { wch: 18 }, // No WhatsApp
+        { wch: 22 }, // DPD Domisili
+        { wch: 18 }, // DPC Domisili
+        { wch: 34 }, // Alamat Domisili
+        { wch: 22 }, // Profesi / Keahlian
+        { wch: 18 }, // Jenjang Marhalah
+        { wch: 15 }, // Status Kader
+        { wch: 26 }  // Kode Pelatihan Diikuti
+      ];
+      XLSX.utils.book_append_sheet(wb, wsTemplate, 'Template_Kader');
+
+      // Sheet 2: Panduan & Daftar Kode Resmi dari Sistem
+      const guideRows = [
+        { Kategori: 'DPD Domisili Valid', Nilai_Valid: DPD_LIST.join(' | '), Keterangan: 'Pilih salah satu dari 6 DPD Sulawesi Barat' },
+        { Kategori: 'Jenjang Marhalah Valid', Nilai_Valid: MARHALAH_LIST.map(m => `${m.label} (${m.code})`).join(' | '), Keterangan: 'Isi nama marhalah atau kodenya' },
+        { Kategori: 'Jenis Kelamin Valid', Nilai_Valid: 'Ikhwan | Akhwat', Keterangan: 'Wajib Ikhwan atau Akhwat' },
+        { Kategori: 'Status Kader Valid', Nilai_Valid: 'Aktif | Kurang Aktif', Keterangan: 'Default: Aktif' },
+        { Kategori: 'Format Tanggal Lahir', Nilai_Valid: 'YYYY-MM-DD (Contoh: 1994-08-17)', Keterangan: 'Tahun-Bulan-Tanggal' },
+        { Kategori: 'Kode Pelatihan Master', Nilai_Valid: pelatihanList.map(p => `${p.kode} = ${p.nama}`).join(' | ') || '-', Keterangan: 'Pisahkan dengan tanda koma jika lebih dari 1 kode' }
+      ];
+      const wsGuide = XLSX.utils.json_to_sheet(guideRows);
+      wsGuide['!cols'] = [{ wch: 24 }, { wch: 68 }, { wch: 38 }];
+      XLSX.utils.book_append_sheet(wb, wsGuide, 'Panduan_Pengisian');
+
+      XLSX.writeFile(wb, 'Template_Kader_SIKAD_Sulbar.xlsx');
+      showToast('Template Excel berhasil diunduh.', 'success');
+    }
+
+    function parseExcelDate(rawVal) {
+      if (rawVal === null || rawVal === undefined || rawVal === '') return '';
+      if (typeof rawVal === 'number' && window.XLSX && XLSX.SSF && typeof XLSX.SSF.parse_date_code === 'function') {
+        const parsed = XLSX.SSF.parse_date_code(rawVal);
+        if (parsed && parsed.y && parsed.m && parsed.d) {
+          return `${String(parsed.y).padStart(4, '0')}-${String(parsed.m).padStart(2, '0')}-${String(parsed.d).padStart(2, '0')}`;
+        }
+      }
+      const str = String(rawVal).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+      const slashMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (slashMatch) {
+        return `${slashMatch[3]}-${slashMatch[2].padStart(2, '0')}-${slashMatch[1].padStart(2, '0')}`;
+      }
+      return str;
+    }
+
+    function normalizeDpdInput(rawDpd) {
+      const clean = String(rawDpd || '').trim().toLowerCase();
+      if (!clean) return DPD_LIST[0];
+      const found = DPD_LIST.find(d => d.toLowerCase() === clean || d.toLowerCase().replace('dpd ', '') === clean);
+      return found || null;
+    }
+
+    function normalizeMarhalahInput(rawMarhalah) {
+      const clean = String(rawMarhalah || '').trim().toLowerCase();
+      if (!clean) return "Pra-Ta'rif";
+      const found = MARHALAH_LIST.find(m => m.label.toLowerCase() === clean || m.code.toLowerCase() === clean);
+      return found ? found.label : null;
+    }
+
+    function handleBulkExcelFileChange(event) {
+      const file = event.target?.files?.[0];
+      if (!file) return;
+
+      if (typeof window.XLSX === 'undefined') {
+        showToast('Library Excel belum termuat. Muat ulang halaman dan coba lagi.', 'error');
+        return;
+      }
+
+      document.getElementById('bulk-file-label').textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rawJsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+          if (!rawJsonRows || rawJsonRows.length === 0) {
+            showToast('File Excel kosong atau tidak memiliki baris data.', 'error');
+            return;
+          }
+
+          let nextSeqCounter = getNextRegSeq();
+          const seenWaInFile = new Set();
+
+          bulkParsedRows = rawJsonRows.map((row, index) => {
+            const excelRowNum = index + 2; // Header di baris 1
+            const getCol = (...keys) => {
+              const rowKeys = Object.keys(row);
+              for (const k of keys) {
+                const matchedKey = rowKeys.find(rk => rk.trim().toLowerCase() === k.toLowerCase());
+                if (matchedKey !== undefined) return String(row[matchedKey] ?? '').trim();
+              }
+              return '';
+            };
+
+            const nama = getCol('Nama Lengkap', 'Nama');
+            const genderRaw = getCol('Jenis Kelamin', 'Gender');
+            const tempatLahir = getCol('Tempat Lahir');
+            const tanggalLahirRaw = (() => {
+              const rowKeys = Object.keys(row);
+              const matchedKey = rowKeys.find(rk => rk.trim().toLowerCase() === 'tanggal lahir');
+              return matchedKey !== undefined ? row[matchedKey] : '';
+            })();
+            const tanggalLahir = parseExcelDate(tanggalLahirRaw);
+            const waRaw = getCol('No WhatsApp', 'No. WhatsApp', 'WhatsApp', 'No WA');
+            const dpdRaw = getCol('DPD Domisili', 'DPD');
+            const dpc = getCol('DPC Domisili', 'DPC') || '-';
+            const alamat = getCol('Alamat Domisili', 'Alamat') || '-';
+            const profesi = getCol('Profesi / Keahlian', 'Profesi', 'Keahlian') || '-';
+            const marhalahRaw = getCol('Jenjang Marhalah', 'Marhalah');
+            const statusRaw = getCol('Status Kader', 'Status');
+            const kodePltRaw = getCol('Kode Pelatihan Diikuti', 'Kode Pelatihan', 'Pelatihan');
+
+            const errors = [];
+
+            if (!nama) errors.push('Nama Lengkap wajib diisi');
+
+            const waNorm = normalizeWhatsApp(waRaw);
+            if (!waRaw) {
+              errors.push('No. WhatsApp wajib diisi');
+            } else if (waNorm.length < 9) {
+              errors.push('No. WhatsApp minimal 9 digit');
+            } else {
+              const dupExisting = kaderList.find(k => normalizeWhatsApp(k.no_whatsapp) === waNorm);
+              if (dupExisting) {
+                errors.push(`WA ganda dgn ${dupExisting.nama_lengkap} (${dupExisting.id_kader})`);
+              } else if (seenWaInFile.has(waNorm)) {
+                errors.push('WA duplikat di dalam file Excel');
+              }
+            }
+
+            const dpd = normalizeDpdInput(dpdRaw);
+            if (!dpd) {
+              errors.push(`DPD "${dpdRaw}" tidak dikenali`);
+            }
+
+            const marhalah = normalizeMarhalahInput(marhalahRaw);
+            if (!marhalah) {
+              errors.push(`Marhalah "${marhalahRaw}" tidak valid`);
+            }
+
+            const gender = genderRaw.toLowerCase() === 'akhwat' ? 'Akhwat' : 'Ikhwan';
+            const status = statusRaw.toLowerCase() === 'kurang aktif' ? 'Kurang Aktif' : 'Aktif';
+
+            // Cocokkan kode pelatihan dari kolom Excel dengan Master Daurah & Pelatihan
+            const pelatihanIds = [];
+            if (kodePltRaw) {
+              const codes = kodePltRaw.split(/[,;]+/).map(c => c.trim().toUpperCase()).filter(Boolean);
+              codes.forEach(code => {
+                const foundPlt = pelatihanList.find(p => p.kode.toUpperCase() === code);
+                if (foundPlt && !pelatihanIds.includes(foundPlt.id)) {
+                  pelatihanIds.push(foundPlt.id);
+                }
+              });
+            }
+
+            const isValid = errors.length === 0;
+            let regSeq = null;
+            let idKader = '-';
+
+            if (isValid) {
+              seenWaInFile.add(waNorm);
+              regSeq = nextSeqCounter++;
+              idKader = formatKaderId(marhalah, regSeq);
+            }
+
+            return {
+              excelRowNum,
+              isValid,
+              errors,
+              kaderObj: {
+                reg_seq: regSeq,
+                id_kader: idKader,
+                nama_lengkap: nama || '(Kosong)',
+                jenis_kelamin: gender,
+                tempat_lahir: tempatLahir || '-',
+                tanggal_lahir: tanggalLahir || '',
+                no_whatsapp: waRaw || '-',
+                dpd: dpd || dpdRaw || '-',
+                dpc,
+                alamat,
+                profesi,
+                marhalah: marhalah || marhalahRaw || '-',
+                status,
+                pelatihan_ids: pelatihanIds
+              }
+            };
+          });
+
+          renderBulkPreviewTable();
+        } catch (err) {
+          console.error('Gagal membaca file Excel:', err);
+          showToast(`Gagal membaca file Excel: ${err.message}`, 'error');
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function renderBulkPreviewTable() {
+      const section = document.getElementById('bulk-preview-section');
+      const tbody = document.getElementById('bulk-preview-tbody');
+      const importBtn = document.getElementById('btn-execute-bulk-import');
+
+      const totalCount = bulkParsedRows.length;
+      const validRows = bulkParsedRows.filter(r => r.isValid);
+      const invalidCount = totalCount - validRows.length;
+
+      document.getElementById('bulk-stat-total').textContent = totalCount;
+      document.getElementById('bulk-stat-valid').textContent = validRows.length;
+      document.getElementById('bulk-stat-invalid').textContent = invalidCount;
+
+      importBtn.disabled = validRows.length === 0;
+      importBtn.textContent = validRows.length > 0
+        ? `Simpan & Impor ${validRows.length} Kader Valid`
+        : 'Simpan & Impor Kader Valid';
+
+      tbody.innerHTML = bulkParsedRows.map(item => {
+        const k = item.kaderObj;
+        const mMeta = getMarhalahMeta(k.marhalah);
+        const marhalahPill = MARHALAH_LIST.some(m => m.label === k.marhalah)
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${mMeta.badgeClass}">
+              <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${mMeta.color};"></span>${escapeHtml(k.marhalah)}
+             </span>`
+          : `<span class="text-rose-600 font-semibold">${escapeHtml(k.marhalah)}</span>`;
+
+        const statusCell = item.isValid
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[11px] font-bold">✓ Siap Diimpor</span>`
+          : `<span class="inline-block px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 border border-rose-300 text-[11px] font-semibold">${escapeHtml(item.errors.join('; '))}</span>`;
+
+        return `
+          <tr class="${item.isValid ? 'bg-white' : 'bg-rose-50/60'}">
+            <td class="py-2.5 px-3 font-mono text-slate-500">#${item.excelRowNum}</td>
+            <td class="py-2.5 px-3 font-mono font-bold text-[#0f766e] whitespace-nowrap">${escapeHtml(k.id_kader)}</td>
+            <td class="py-2.5 px-3 font-bold text-slate-900">${escapeHtml(k.nama_lengkap)} <span class="font-normal text-slate-500">(${escapeHtml(k.jenis_kelamin)})</span></td>
+            <td class="py-2.5 px-3 text-slate-700">${escapeHtml(k.dpd)} <span class="text-slate-400">/ ${escapeHtml(k.dpc)}</span></td>
+            <td class="py-2.5 px-3 whitespace-nowrap">${marhalahPill}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-700 whitespace-nowrap">${escapeHtml(k.no_whatsapp)}</td>
+            <td class="py-2.5 px-3">${statusCell}</td>
+          </tr>
+        `;
+      }).join('');
+
+      section.classList.remove('hidden');
+    }
+
+    async function executeBulkImport() {
+      const validRows = bulkParsedRows.filter(r => r.isValid);
+      if (validRows.length === 0) return;
+
+      const importBtn = document.getElementById('btn-execute-bulk-import');
+      importBtn.disabled = true;
+      importBtn.textContent = 'Menyimpan ke Database...';
+
+      const nowIso = new Date().toISOString();
+      const dbRowsToUpsert = validRows.map(item => ({
+        id: makeKaderDbId(item.kaderObj.reg_seq),
+        tipe_data: 'kader',
+        payload: item.kaderObj,
+        updated_at: nowIso
+      }));
+
+      try {
+        await upsertRowsToSupabaseAndBackup(dbRowsToUpsert);
+
+        // Masukkan kader baru ke bagian atas daftar lokal
+        for (let i = validRows.length - 1; i >= 0; i--) {
+          kaderList.unshift(validRows[i].kaderObj);
+        }
+
+        saveFallbackToLocalStorage();
+        closeBulkImportModal();
+        refreshAllViews();
+        showToast(`Berhasil mengimpor ${validRows.length} data kader baru dari Excel.`, 'success');
+      } catch (err) {
+        importBtn.disabled = false;
+        importBtn.textContent = `Simpan & Impor ${validRows.length} Kader Valid`;
+        showToast(`Gagal mengimpor data massal: ${err.message}`, 'error');
       }
     }
 

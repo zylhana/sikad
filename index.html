@@ -966,7 +966,7 @@
             <div class="flex items-center justify-between gap-2">
               <div>
                 <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#0f766e]">Skema Tabel Supabase ("data_utama")</h4>
-                <p class="text-[11px] text-slate-500">Jalankan SQL berikut pada SQL Editor proyek Supabase Anda, lalu isi <code class="font-mono">SUPABASE_URL</code> & <code class="font-mono">SUPABASE_ANON_KEY</code> di bagian atas skrip.</p>
+                <p class="text-[11px] text-slate-500">Jalankan SQL berikut pada SQL Editor proyek Supabase Anda, lalu isi <code class="font-mono"></code> & <code class="font-mono">SUPABASE_ANON_KEY</code> di bagian atas skrip.</p>
               </div>
               <button type="button" onclick="copySupabaseSqlSnippet()" class="px-3 py-1.5 rounded-lg bg-[#e6eee9] hover:bg-[#d5e3db] text-[#0f766e] border border-[#b8cdc1] text-xs font-bold shrink-0 cursor-pointer">
                 Salin SQL
@@ -1031,8 +1031,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     // =========================================================================
     // 1. KONFIGURASI SUPABASE & KONSTANTA STORAGE
     // =========================================================================
-    const SUPABASE_URL = "[https://zrpfcotcvbnmzvbtwyxr.supabase.co/rest/v1/]";
-    const SUPABASE_ANON_KEY = "[sb_publishable_gYCqrPIWJ3a2ZBS-v1-axw_UDwjmVZ5]";
+    const SUPABASE_URL = "https://zrpfcotcvbnmzvbtwyxr.supabase.co/rest/v1/";
+    const SUPABASE_ANON_KEY = "sb_publishable_gYCqrPIWJ3a2ZBS-v1-axw_UDwjmVZ5";
     const SUPABASE_TABLE = "data_utama";
 
     const STORAGE_KEYS = {
@@ -1384,12 +1384,12 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     function initSupabaseClient() {
       const urlValid = typeof SUPABASE_URL === 'string' &&
         SUPABASE_URL.trim() !== '' &&
-        !SUPABASE_URL.includes('[https://zrpfcotcvbnmzvbtwyxr.supabase.co/rest/v1/]') &&
+        !SUPABASE_URL.includes('https://zrpfcotcvbnmzvbtwyxr.supabase.co/rest/v1/') &&
         SUPABASE_URL.startsWith('http');
 
       const keyValid = typeof SUPABASE_ANON_KEY === 'string' &&
         SUPABASE_ANON_KEY.trim() !== '' &&
-        !SUPABASE_ANON_KEY.includes('[sb_publishable_gYCqrPIWJ3a2ZBS-v1-axw_UDwjmVZ5]');
+        !SUPABASE_ANON_KEY.includes('sb_publishable_gYCqrPIWJ3a2ZBS-v1-axw_UDwjmVZ5');
 
       if (urlValid && keyValid && window.supabase && typeof window.supabase.createClient === 'function') {
         try {

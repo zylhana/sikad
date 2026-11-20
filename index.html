@@ -231,10 +231,10 @@
           <!-- Baris Kanan Header: 2 Indikator Status ( & Backup GitHub) + Tombol Restore & Registrasi -->
           <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
 
-            <!-- Indikator 1: Status Koneksi  -->
-            <div id="status--badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold">
-              <span id="status--dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-              <span id="status--text">Supabase: Belum Dikonfigurasi</span>
+           <!-- Indikator 1: Status Koneksi Supabase -->
+            <div id="status-supabase-badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold">
+              <span id="status-supabase-dot" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+              <span id="status-supabase-text">Supabase: Belum Dikonfigurasi</span>
             </div>
 
             <!-- Indikator 2: Waktu Terakhir Berhasil Backup ke GitHub -->
@@ -1381,15 +1381,15 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     let chartMarhalahInstance = null;
     let chartPelatihanInstance = null;
 
-    function initSupabaseClient() {
+function initSupabaseClient() {
       const urlValid = typeof SUPABASE_URL === 'string' &&
         SUPABASE_URL.trim() !== '' &&
-        !SUPABASE_URL.includes('https://zrpfcotcvbnmzvbtwyxr.supabase.co/rest/v1/') &&
+        !SUPABASE_URL.includes('[TEMPEL_PROJECT_URL]') &&
         SUPABASE_URL.startsWith('http');
 
       const keyValid = typeof SUPABASE_ANON_KEY === 'string' &&
         SUPABASE_ANON_KEY.trim() !== '' &&
-        !SUPABASE_ANON_KEY.includes('sb_publishable_gYCqrPIWJ3a2ZBS-v1-axw_UDwjmVZ5');
+        !SUPABASE_ANON_KEY.includes('[TEMPEL_ANON_KEY]');
 
       if (urlValid && keyValid && window.supabase && typeof window.supabase.createClient === 'function') {
         try {

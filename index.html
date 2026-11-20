@@ -1384,12 +1384,12 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     function initSupabaseClient() {
       const urlValid = typeof SUPABASE_URL === 'string' &&
         SUPABASE_URL.trim() !== '' &&
-        !SUPABASE_URL.includes('[TEMPEL_PROJECT_URL]') &&
+        !SUPABASE_URL.includes('[https://zrpfcotcvbnmzvbtwyxr.supabase.co/rest/v1/]') &&
         SUPABASE_URL.startsWith('http');
 
       const keyValid = typeof SUPABASE_ANON_KEY === 'string' &&
         SUPABASE_ANON_KEY.trim() !== '' &&
-        !SUPABASE_ANON_KEY.includes('[TEMPEL_ANON_KEY]');
+        !SUPABASE_ANON_KEY.includes('[sb_publishable_gYCqrPIWJ3a2ZBS-v1-axw_UDwjmVZ5]');
 
       if (urlValid && keyValid && window.supabase && typeof window.supabase.createClient === 'function') {
         try {

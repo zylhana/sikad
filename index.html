@@ -1481,6 +1481,11 @@
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Jika tabel sudah dibuat sebelumnya, jalankan perintah migrasi berikut:
+ALTER TABLE public.data_utama DROP CONSTRAINT IF EXISTS data_utama_tipe_data_check;
+ALTER TABLE public.data_utama ADD CONSTRAINT data_utama_tipe_data_check
+  CHECK (tipe_data IN ('kader', 'pelatihan', 'kki'));
+
 ALTER TABLE public.data_utama ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
@@ -2981,27 +2986,25 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       (rows || []).forEach(row => {
         if (!row || !row.payload) return;
         const p = row.payload;
+        const rowIdUpper = String(row.id || p.id || '').trim().toUpperCase();
 
-        if (row.tipe_data === 'pelatihan') {
-          nextPelatihan.push({
-            id: String(p.id || row.id),
-            kode: String(p.kode || '-'),
-            nama: String(p.nama || 'Pelatihan Tanpa Nama')
-          });
-        } else if (row.tipe_data === 'kki') {
-          nextKki.push({
-            id: String(p.id || row.id),
-            nama_kki: String(p.nama_kki || ''),
-            nama_murabbi: String(p.nama_murabbi || ''),
-            marhalah: MARHALAH_LIST.some(m => m.label === p.marhalah) ? p.marhalah : '',
-            tahun_terbentuk: String(p.tahun_terbentuk || ''),
-            hari_tarbiyah: String(p.hari_tarbiyah || ''),
-            jam_tarbiyah: String(p.jam_tarbiyah || ''),
-            naqib_seq: p.naqib_seq !== null && p.naqib_seq !== undefined ? Number(p.naqib_seq) : null,
-            sekretaris_seq: p.sekretaris_seq !== null && p.sekretaris_seq !== undefined ? Number(p.sekretaris_seq) : null,
-            bendahara_seq: p.bendahara_seq !== null && p.bendahara_seq !== undefined ? Number(p.bendahara_seq) : null
-          });
-        } else if (row.tipe_data === 'kader') {
+        // 1. Identifikasi data Kader terlebih dahulu agar tidak tertukar meski memiliki nama_kki/nama_murabbi
+        const isKaderRecord =
+          row.tipe_data === 'kader' ||
+          rowIdUpper.startsWith('KDR-') ||
+          p.reg_seq !== undefined ||
+          (typeof p.nama_lengkap === 'string' && p.nama_lengkap.trim() !== '');
+
+        // 2. Identifikasi data KKI & Murabbi (baik bertipe 'kki' maupun data lama bertipe 'pelatihan' berawalan KKI- / berisi nama_kki)
+        const isKkiRecord =
+          !isKaderRecord && (
+            row.tipe_data === 'kki' ||
+            rowIdUpper.startsWith('KKI-') ||
+            (typeof p.nama_kki === 'string' && p.nama_kki.trim() !== '') ||
+            (typeof p.nama_murabbi === 'string' && p.nama_murabbi.trim() !== '')
+          );
+
+        if (isKaderRecord) {
           const seq = Number(p.reg_seq) || (nextKader.length + 1);
           const marhalah = MARHALAH_LIST.some(m => m.label === p.marhalah) ? p.marhalah : "Pra-Ta'rif";
           nextKader.push({
@@ -3021,6 +3024,33 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
             marhalah: marhalah,
             status: p.status === 'Kurang Aktif' ? 'Kurang Aktif' : 'Aktif',
             pelatihan_ids: Array.isArray(p.pelatihan_ids) ? p.pelatihan_ids.map(String) : []
+          });
+        } else if (isKkiRecord) {
+          const namaKki = String(p.nama_kki || '').trim();
+          const namaMurabbi = String(p.nama_murabbi || '').trim();
+          if (!namaKki && !namaMurabbi) return;
+
+          nextKki.push({
+            id: String(p.id || row.id || ('KKI-' + (nextKki.length + 1))),
+            nama_kki: namaKki || 'KKI Tanpa Nama',
+            nama_murabbi: namaMurabbi || '-',
+            marhalah: MARHALAH_LIST.some(m => m.label === p.marhalah) ? p.marhalah : '',
+            tahun_terbentuk: String(p.tahun_terbentuk || ''),
+            hari_tarbiyah: String(p.hari_tarbiyah || ''),
+            jam_tarbiyah: String(p.jam_tarbiyah || ''),
+            naqib_seq: p.naqib_seq !== null && p.naqib_seq !== undefined ? Number(p.naqib_seq) : null,
+            sekretaris_seq: p.sekretaris_seq !== null && p.sekretaris_seq !== undefined ? Number(p.sekretaris_seq) : null,
+            bendahara_seq: p.bendahara_seq !== null && p.bendahara_seq !== undefined ? Number(p.bendahara_seq) : null
+          });
+        } else if (row.tipe_data === 'pelatihan' || rowIdUpper.startsWith('PLT-')) {
+          const namaPlt = String(p.nama || '').trim();
+          const kodePlt = String(p.kode || '').trim();
+          if (!namaPlt && !kodePlt) return;
+
+          nextPelatihan.push({
+            id: String(p.id || row.id),
+            kode: kodePlt || '-',
+            nama: namaPlt || 'Pelatihan Tanpa Nama'
           });
         }
       });
@@ -3066,15 +3096,46 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       }
     }
 
+    async function upsertRowsWithCheckFallback(rowsToUpsert) {
+      if (!isSupabaseConfigured || !supabaseClient || !Array.isArray(rowsToUpsert) || rowsToUpsert.length === 0) {
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from(SUPABASE_TABLE)
+        .upsert(rowsToUpsert, { onConflict: 'id' });
+
+      if (!error) return;
+
+      const isCheckConstraintError =
+        error.code === '23514' ||
+        /check constraint|tipe_data/i.test(String(error.message || ''));
+
+      const hasKkiRows = rowsToUpsert.some(r => r.tipe_data === 'kki');
+
+      if (isCheckConstraintError && hasKkiRows) {
+        // Kompatibilitas otomatis jika tabel Supabase masih memakai constraint tipe_data IN ('kader', 'pelatihan')
+        const compatibleRows = rowsToUpsert.map(r =>
+          r.tipe_data === 'kki'
+            ? { ...r, tipe_data: 'pelatihan' }
+            : r
+        );
+        const { error: retryError } = await supabaseClient
+          .from(SUPABASE_TABLE)
+          .upsert(compatibleRows, { onConflict: 'id' });
+
+        if (retryError) {
+          throw new Error(retryError.message || 'Gagal menyimpan ke Supabase');
+        }
+        return;
+      }
+
+      throw new Error(error.message || 'Gagal menyimpan ke Supabase');
+    }
+
     async function upsertRowsToSupabaseAndBackup(rowsToUpsert) {
       if (isSupabaseConfigured && supabaseClient) {
-        const { error } = await supabaseClient
-          .from(SUPABASE_TABLE)
-          .upsert(rowsToUpsert, { onConflict: 'id' });
-
-        if (error) {
-          throw new Error(error.message || 'Gagal menyimpan ke Supabase');
-        }
+        await upsertRowsWithCheckFallback(rowsToUpsert);
         isSupabaseConnected = true;
         setSupabaseStatusIndicator('connected', 'Supabase: Terhubung');
       }
@@ -3095,12 +3156,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         }
 
         if (additionalRowsToUpsert.length > 0) {
-          const { error: upsertErr } = await supabaseClient
-            .from(SUPABASE_TABLE)
-            .upsert(additionalRowsToUpsert, { onConflict: 'id' });
-          if (upsertErr) {
-            throw new Error(upsertErr.message || 'Gagal memperbarui relasi di Supabase');
-          }
+          await upsertRowsWithCheckFallback(additionalRowsToUpsert);
         }
 
         isSupabaseConnected = true;
@@ -3281,14 +3337,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         }
 
         if (isSupabaseConfigured && supabaseClient) {
-          const { error } = await supabaseClient
-            .from(SUPABASE_TABLE)
-            .upsert(validRecords, { onConflict: 'id' });
-
-          if (error) {
-            throw new Error(error.message || 'Gagal melakukan .upsert() ke Supabase');
-          }
-
+          await upsertRowsWithCheckFallback(validRecords);
           await loadInitialData();
         } else {
           hydrateStateFromRows(validRecords);

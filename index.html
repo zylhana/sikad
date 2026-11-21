@@ -111,7 +111,7 @@
     <!-- Backdrop Sidebar Mobile -->
     <div id="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-30 hidden lg:hidden transition-opacity"></div>
 
-    <!-- SIDEBAR NAVIGASI (3 LAMAN UTAMA - TANPA HAK AKSES) -->
+    <!-- SIDEBAR NAVIGASI (4 LAMAN UTAMA - TANPA HAK AKSES) -->
     <aside id="app-sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-72 bg-sidebar-gradient text-white flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out shadow-xl lg:shadow-none shrink-0">
 
       <!-- Bagian Atas: Identitas SIKAD & Menu -->
@@ -141,7 +141,7 @@
           </button>
         </div>
 
-        <!-- Menu Navigasi 3 Laman -->
+        <!-- Menu Navigasi 4 Laman -->
         <nav class="p-4 space-y-1.5" aria-label="Navigasi Utama">
           <p class="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/65">Menu Utama</p>
 
@@ -159,11 +159,18 @@
             <span>Direktori Kader</span>
           </button>
 
+          <button type="button" id="nav-halaqah" onclick="navigateTo('halaqah')" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer text-white/80 hover:bg-white/10 hover:text-white border border-transparent">
+            <svg class="w-5 h-5 text-white/90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span>Halaqah</span>
+          </button>
+
           <button type="button" id="nav-master" onclick="navigateTo('master')" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer text-white/80 hover:bg-white/10 hover:text-white border border-transparent">
             <svg class="w-5 h-5 text-white/90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
             </svg>
-            <span>Master Daurah & Pelatihan</span>
+            <span>Master Pelatihan & KKI</span>
           </button>
         </nav>
       </div>
@@ -275,7 +282,7 @@
           <!-- =============================================================== -->
           <section id="page-dashboard" class="space-y-6">
 
-            <!-- Bar Filter Dashboard Analitik (Filter per DPD & per Marhalah) -->
+            <!-- Bar Filter Dashboard Analitik (Multi-Pilih DPD & Multi-Pilih Marhalah) -->
             <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#d5e0d9] shadow-xs flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3.5">
               <div>
                 <div class="flex items-center gap-2">
@@ -283,32 +290,54 @@
                   <h3 class="text-sm font-extrabold text-slate-900">Filter Statistik & Grafik Dashboard</h3>
                 </div>
                 <p class="text-xs text-slate-500 mt-0.5">
-                  Menampilkan statistik untuk <strong id="dashboard-filter-summary" class="text-[#0f766e]">Semua DPD & Semua Marhalah (0 kader)</strong>
+                  Menampilkan statistik untuk <strong id="dashboard-filter-summary" class="text-[#0f766e]">Semua DPD • Semua Marhalah (0 kader)</strong>
                 </p>
               </div>
 
               <div class="flex flex-wrap items-center gap-2.5">
-                <!-- Filter DPD -->
-                <select id="dashboard-filter-dpd" onchange="renderDashboard()" aria-label="Filter Dashboard per DPD" class="px-3.5 py-2 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
-                  <option value="ALL">Semua DPD (6 Kab. Sulbar)</option>
-                  <option value="DPD Mamuju">DPD Mamuju</option>
-                  <option value="DPD Majene">DPD Majene</option>
-                  <option value="DPD Polewali Mandar">DPD Polewali Mandar</option>
-                  <option value="DPD Mamasa">DPD Mamasa</option>
-                  <option value="DPD Pasangkayu">DPD Pasangkayu</option>
-                  <option value="DPD Mamuju Tengah">DPD Mamuju Tengah</option>
-                </select>
+                <!-- Multi-Select Dropdown DPD -->
+                <div class="relative" id="dashboard-dpd-dropdown">
+                  <button type="button" onclick="toggleDashboardDropdown('dpd', event)" class="inline-flex items-center justify-between gap-2.5 px-3.5 py-2 bg-[#f4f7f5] hover:bg-[#e6eee9] border border-[#cddcd3] rounded-xl text-xs sm:text-sm font-semibold text-slate-700 transition-colors cursor-pointer min-w-[205px]">
+                    <span id="dashboard-dpd-btn-label" class="truncate">Semua DPD (6 Kab. Sulbar)</span>
+                    <svg class="w-4 h-4 text-[#5f8575] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
 
-                <!-- Filter Marhalah -->
-                <select id="dashboard-filter-marhalah" onchange="renderDashboard()" aria-label="Filter Dashboard per Marhalah" class="px-3.5 py-2 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
-                  <option value="ALL">Semua Jenjang Marhalah</option>
-                  <option value="Pra-Ta'rif">Pra-Ta'rif (PT)</option>
-                  <option value="Ta'rif 1">Ta'rif 1 (T1)</option>
-                  <option value="Ta'rif 2">Ta'rif 2 (T2)</option>
-                  <option value="Takwin 1">Takwin 1 (TK1)</option>
-                  <option value="Takwin 2">Takwin 2 (TK2)</option>
-                  <option value="Tanfidz">Tanfidz (TF)</option>
-                </select>
+                  <div id="dashboard-dpd-panel" onclick="event.stopPropagation()" class="hidden absolute right-0 sm:left-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#cddcd3] p-3 z-30 space-y-2">
+                    <div class="flex items-center justify-between pb-2 border-b border-[#e6eee9]">
+                      <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#0f766e]">Pilih DPD (Bisa > 1)</span>
+                      <button type="button" onclick="clearDashboardDpdSelection()" class="text-[11px] font-bold text-[#5f8575] hover:text-[#0f766e] underline cursor-pointer">
+                        Semua DPD
+                      </button>
+                    </div>
+                    <div id="dashboard-dpd-options" class="space-y-1 max-h-60 overflow-y-auto">
+                      <!-- Diisi dinamis oleh JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Multi-Select Dropdown Marhalah -->
+                <div class="relative" id="dashboard-marhalah-dropdown">
+                  <button type="button" onclick="toggleDashboardDropdown('marhalah', event)" class="inline-flex items-center justify-between gap-2.5 px-3.5 py-2 bg-[#f4f7f5] hover:bg-[#e6eee9] border border-[#cddcd3] rounded-xl text-xs sm:text-sm font-semibold text-slate-700 transition-colors cursor-pointer min-w-[205px]">
+                    <span id="dashboard-marhalah-btn-label" class="truncate">Semua Jenjang Marhalah</span>
+                    <svg class="w-4 h-4 text-[#5f8575] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <div id="dashboard-marhalah-panel" onclick="event.stopPropagation()" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#cddcd3] p-3 z-30 space-y-2">
+                    <div class="flex items-center justify-between pb-2 border-b border-[#e6eee9]">
+                      <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#0f766e]">Pilih Marhalah (Bisa > 1)</span>
+                      <button type="button" onclick="clearDashboardMarhalahSelection()" class="text-[11px] font-bold text-[#5f8575] hover:text-[#0f766e] underline cursor-pointer">
+                        Semua Marhalah
+                      </button>
+                    </div>
+                    <div id="dashboard-marhalah-options" class="space-y-1 max-h-60 overflow-y-auto">
+                      <!-- Diisi dinamis oleh JS -->
+                    </div>
+                  </div>
+                </div>
 
                 <button type="button" id="btn-reset-dashboard-filter" onclick="resetDashboardFilter()" class="hidden px-3.5 py-2 rounded-xl bg-[#e6eee9] hover:bg-[#d5e3db] text-[#0f766e] border border-[#b8cdc1] text-xs font-bold transition-colors cursor-pointer">
                   Reset Filter
@@ -458,6 +487,37 @@
               </div>
             </div>
 
+            <!-- Baris Grafik 3: Jumlah Kader yang Telah Mengikuti Salah Satu Pelatihan per DPD (Dropdown) -->
+            <div class="bg-white rounded-2xl p-5 sm:p-6 border border-[#d5e0d9] shadow-xs space-y-4">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                  <h3 class="text-base font-extrabold text-slate-900">Sebaran Peserta Pelatihan per DPD</h3>
+                  <p id="chart-pelatihan-dpd-subtitle" class="text-xs text-slate-500 mt-0.5">Jumlah kader yang telah mengikuti pelatihan terpilih pada masing-masing DPD</p>
+                  <p class="text-[11px] font-semibold text-[#5f8575] mt-1">Klik batang grafik per DPD untuk menampilkan rincian nama kader &amp; marhalahnya.</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <label for="dashboard-select-pelatihan-dpd" class="text-xs font-bold text-[#5f8575] whitespace-nowrap">Pilih Pelatihan:</label>
+                  <select id="dashboard-select-pelatihan-dpd" onchange="renderDashboard()" class="px-3.5 py-2 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-xs sm:text-sm font-bold text-[#0b4f4a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e] min-w-[240px] max-w-full">
+                    <!-- Diisi dinamis oleh JS dari Master Pelatihan -->
+                  </select>
+                </div>
+              </div>
+
+              <div class="relative h-64 w-full">
+                <canvas id="chart-pelatihan-dpd"></canvas>
+              </div>
+
+              <div id="pelatihan-dpd-breakdown-list" class="pt-3.5 border-t border-[#e6eee9] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <!-- Diisi dinamis oleh JS -->
+              </div>
+
+              <!-- Panel Rincian Nama Kader & Marhalah Saat Batang Grafik DPD Diklik -->
+              <div id="pelatihan-dpd-kader-detail" class="hidden pt-4 border-t border-[#cddcd3] space-y-3">
+                <!-- Diisi dinamis oleh JS -->
+              </div>
+            </div>
+
           </section>
 
           <!-- =============================================================== -->
@@ -469,7 +529,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Direktori Kader Sulawesi Barat</h2>
-                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Klik tombol <strong class="text-[#0f766e]">Detail</strong> pada setiap baris kader untuk melihat biodata lengkap & riwayat daurah/pelatihan.</p>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Klik tombol <strong class="text-[#0f766e]">Detail</strong> pada setiap baris kader untuk melihat biodata lengkap, KKI & Murabbi, serta riwayat daurah/pelatihan.</p>
               </div>
               <div class="flex flex-wrap items-center gap-2.5">
                 <button type="button" onclick="exportKaderCSV()" class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white hover:bg-[#e6eee9] text-[#2f5245] border border-[#b8cdc1] font-bold text-xs sm:text-sm shadow-2xs transition-colors cursor-pointer">
@@ -502,7 +562,7 @@
                   <svg class="w-4 h-4 text-[#7c9a82] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  <input type="text" id="search-kader" oninput="renderDirektoriTable()" placeholder="Cari nama, no. induk, WA, atau profesi..." class="w-full pl-10 pr-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-[#0f766e] transition-all" />
+                  <input type="text" id="search-kader" oninput="renderDirektoriTable()" placeholder="Cari nama, no. induk, WA, KKI, Murabbi, profesi..." class="w-full pl-10 pr-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-[#0f766e] transition-all" />
                 </div>
 
                 <!-- Filter DPD -->
@@ -559,7 +619,7 @@
               </div>
             </div>
 
-            <!-- Tabel Direktori Kader (RINGKAS — TANPA KOLOM RIWAYAT PELATIHAN) -->
+            <!-- Tabel Direktori Kader (RINGKAS — TANPA KOLOM RIWAYAT PELATIHAN & TANPA KOLOM KKI/MURABBI) -->
             <div class="bg-white rounded-2xl border border-[#d5e0d9] shadow-xs overflow-hidden">
               <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -590,16 +650,68 @@
           </section>
 
           <!-- =============================================================== -->
-          <!-- LAMAN 3: MASTER DAURAH & PELATIHAN                              -->
+          <!-- LAMAN 3: HALAQAH (BOX-BOX KKI TERDAFTAR PADA LAMAN MASTER)      -->
+          <!-- =============================================================== -->
+          <section id="page-halaqah" class="hidden space-y-5">
+
+            <!-- Header & Pencarian KKI -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Halaqah — Kelompok Kaderisasi Islamiyah (KKI)</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Daftar kelompok KKI yang terdaftar pada laman Master. Klik <strong class="text-[#0f766e]">Lihat</strong> pada box KKI untuk mengelola info halaqah & jabatan pengurus.</p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2.5">
+                <div class="relative w-full sm:w-72">
+                  <svg class="w-4 h-4 text-[#7c9a82] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input type="text" id="search-halaqah" oninput="renderHalaqahGrid()" placeholder="Cari nama KKI, Murabbi, atau Naqib..." class="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#cddcd3] rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+                </div>
+
+                <button type="button" onclick="navigateTo('master'); switchMasterTab('kki');" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white hover:bg-[#e6eee9] text-[#0f766e] border border-[#b8cdc1] text-xs sm:text-sm font-bold shadow-2xs transition-colors cursor-pointer shrink-0">
+                  <span>+ Kelola Master KKI</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Grid Box KKI -->
+            <div id="halaqah-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              <!-- Diisi dinamis oleh JS -->
+            </div>
+
+            <!-- State Kosong Halaqah -->
+            <div id="halaqah-empty-state" class="hidden bg-white rounded-2xl border border-[#d5e0d9] py-12 px-4 text-center space-y-2">
+              <p class="text-sm font-bold text-slate-700">Belum ada data KKI yang sesuai.</p>
+              <p class="text-xs text-slate-500">Tambahkan data KKI & Murabbi melalui menu Master Pelatihan & KKI.</p>
+            </div>
+
+          </section>
+
+          <!-- =============================================================== -->
+          <!-- LAMAN 4: MASTER DAURAH, PELATIHAN & KKI                         -->
           <!-- =============================================================== -->
           <section id="page-master" class="hidden space-y-5">
 
-            <div>
-              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Master Daurah & Pelatihan</h2>
-              <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Kelola daftar resmi program daurah dan pelatihan kader. Setiap program otomatis muncul pada formulir kader dan modal detail profil.</p>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Master Daurah, Pelatihan & KKI</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Kelola daftar resmi program daurah/pelatihan serta daftar Kelompok Kaderisasi Islamiyah (KKI) & Murabbi.</p>
+              </div>
+
+              <!-- Sub-Tab Switcher Master -->
+              <div class="inline-flex p-1 rounded-xl bg-white border border-[#cddcd3] shadow-2xs self-start">
+                <button type="button" id="tab-btn-pelatihan" onclick="switchMasterTab('pelatihan')" class="px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer bg-teal-sage-gradient text-white shadow-2xs">
+                  Daurah & Pelatihan (<span id="tab-count-pelatihan">0</span>)
+                </button>
+                <button type="button" id="tab-btn-kki" onclick="switchMasterTab('kki')" class="px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-slate-600 hover:text-slate-900">
+                  Data KKI & Murabbi (<span id="tab-count-kki">0</span>)
+                </button>
+              </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- PANEL SUB-TAB 1: MASTER DAURAH & PELATIHAN -->
+            <div id="master-panel-pelatihan" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
               <!-- Form Tambah / Edit Daurah & Pelatihan (HANYA 2 INPUT: KODE & NAMA) -->
               <div class="lg:col-span-4 bg-white rounded-2xl p-5 sm:p-6 border border-[#d5e0d9] shadow-xs">
@@ -652,6 +764,69 @@
                       </tr>
                     </thead>
                     <tbody id="master-tbody" class="divide-y divide-[#e6eee9] text-sm">
+                      <!-- Diisi dinamis oleh JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- PANEL SUB-TAB 2: MASTER KKI & MURABBI -->
+            <div id="master-panel-kki" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+              <!-- Form Tambah / Edit KKI & Murabbi -->
+              <div class="lg:col-span-4 bg-white rounded-2xl p-5 sm:p-6 border border-[#d5e0d9] shadow-xs">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#e6eee9]">
+                  <h3 id="master-kki-form-heading" class="text-base font-extrabold text-slate-900">Tambah KKI Baru</h3>
+                  <button type="button" id="btn-cancel-kki-edit" onclick="resetMasterKkiForm()" class="hidden text-xs font-bold text-[#5f8575] hover:text-slate-800 underline cursor-pointer">
+                    Batal Edit
+                  </button>
+                </div>
+
+                <form id="form-master-kki" onsubmit="handleMasterKkiSubmit(event)" class="space-y-4">
+                  <input type="hidden" id="master-kki-edit-id" value="" />
+
+                  <div>
+                    <label for="master-kki-nama" class="block text-xs font-bold text-slate-700 mb-1.5">Nama KKI <span class="text-rose-500">*</span></label>
+                    <input type="text" id="master-kki-nama" required placeholder="Contoh: KKI Al-Fatih" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-[#0f766e]" />
+                  </div>
+
+                  <div>
+                    <label for="master-kki-murabbi" class="block text-xs font-bold text-slate-700 mb-1.5">Nama Murabbi <span class="text-rose-500">*</span></label>
+                    <input type="text" id="master-kki-murabbi" required placeholder="Contoh: Ust. H. Muhammad Ridwan, Lc." class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-[#0f766e]" />
+                  </div>
+
+                  <button type="submit" id="btn-submit-kki" class="w-full py-2.5 px-4 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white font-bold text-sm shadow-sm inline-flex items-center justify-center gap-2 transition-colors cursor-pointer">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Simpan Data KKI</span>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Tabel Daftar KKI & Murabbi -->
+              <div class="lg:col-span-8 bg-white rounded-2xl border border-[#d5e0d9] shadow-xs overflow-hidden">
+                <div class="px-5 py-4 border-b border-[#e6eee9] flex items-center justify-between gap-2">
+                  <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Daftar KKI & Murabbi Terdaftar</h3>
+                    <p class="text-xs text-slate-500">Total <strong id="master-kki-total-badge" class="text-slate-800">0</strong> KKI terdaftar (otomatis tampil di laman Halaqah & rekomendasi registrasi kader)</p>
+                  </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="bg-table-header-gradient text-white text-[11px] font-bold uppercase tracking-wider">
+                        <th class="py-3.5 px-4 whitespace-nowrap w-14">No</th>
+                        <th class="py-3.5 px-4">Nama KKI</th>
+                        <th class="py-3.5 px-4">Nama Murabbi</th>
+                        <th class="py-3.5 px-4 text-center whitespace-nowrap">Jumlah Kader</th>
+                        <th class="py-3.5 px-4 text-right whitespace-nowrap">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="master-kki-tbody" class="divide-y divide-[#e6eee9] text-sm">
                       <!-- Diisi dinamis oleh JS -->
                     </tbody>
                   </table>
@@ -734,9 +909,19 @@
                 <span>Hubungi WA</span>
               </a>
             </div>
+
+            <div class="p-3.5 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9]">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#5f8575] block">Nama KKI</span>
+              <span id="detail-kki" class="font-bold text-slate-900 mt-0.5 block">-</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9]">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-[#5f8575] block">Nama Murabbi</span>
+              <span id="detail-murabbi" class="font-bold text-slate-900 mt-0.5 block">-</span>
+            </div>
           </div>
 
-          <!-- Bagian Khusus: Riwayat Daurah & Pelatihan (PENGECUALIAN KHUSUS: HIJAU TERANG + ✓ UNTUK SUDAH DIIKUTI, POLOS TANPA WARNA UNTUK BELUM DIIKUTI) -->
+          <!-- Bagian Khusus: Riwayat Daurah & Pelatihan (HIJAU TERANG + ✓ UNTUK SUDAH DIIKUTI, POLOS TANPA WARNA UNTUK BELUM DIIKUTI) -->
           <div class="pt-4 border-t border-[#d5e0d9] space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
@@ -847,6 +1032,26 @@
               <label for="input-wa" class="block text-xs font-bold text-slate-700 mb-1">No. WhatsApp Aktif (Anti-Duplikasi) <span class="text-rose-500">*</span></label>
               <input type="tel" id="input-wa" required oninput="validateWhatsAppLive()" placeholder="Contoh: 081242889900 atau +6281242889900" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
               <p id="wa-helper-text" class="text-[11px] text-slate-500 mt-1">Format 08..., 628..., atau +628... dinormalisasi otomatis untuk mencegah data ganda.</p>
+            </div>
+
+            <!-- Nama KKI (Autocomplete dari Master KKI & Murabbi minimal 3 huruf) -->
+            <div class="relative" id="kki-autocomplete-wrapper">
+              <label for="input-nama-kki" class="block text-xs font-bold text-slate-700 mb-1">Nama KKI</label>
+              <input type="text" id="input-nama-kki" autocomplete="off" oninput="handleKkiAutocomplete()" onfocus="handleKkiAutocomplete()" placeholder="Ketik min. 3 huruf (Contoh: KKI Al-Fatih)" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+              <p class="text-[10px] text-slate-400 mt-1">Rekomendasi otomatis muncul dari Master KKI saat mengetik minimal 3 huruf.</p>
+              <div id="kki-suggestions" class="hidden absolute left-0 right-0 top-[66px] z-30 bg-white border border-[#9eb9aa] rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-[#e6eee9]">
+                <!-- Diisi dinamis oleh JS -->
+              </div>
+            </div>
+
+            <!-- Nama Murabbi (Autocomplete dari Master KKI & Murabbi minimal 3 huruf) -->
+            <div class="relative" id="murabbi-autocomplete-wrapper">
+              <label for="input-nama-murabbi" class="block text-xs font-bold text-slate-700 mb-1">Nama Murabbi</label>
+              <input type="text" id="input-nama-murabbi" autocomplete="off" oninput="handleMurabbiAutocomplete()" onfocus="handleMurabbiAutocomplete()" placeholder="Ketik min. 3 huruf (Contoh: Ust. Ridwan)" class="w-full px-3.5 py-2.5 bg-[#f4f7f5] border border-[#cddcd3] rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+              <p class="text-[10px] text-slate-400 mt-1">Rekomendasi otomatis muncul dari Master Murabbi saat mengetik minimal 3 huruf.</p>
+              <div id="murabbi-suggestions" class="hidden absolute left-0 right-0 top-[66px] z-30 bg-white border border-[#9eb9aa] rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-[#e6eee9]">
+                <!-- Diisi dinamis oleh JS -->
+              </div>
             </div>
 
             <!-- DPD Domisili -->
@@ -1025,7 +1230,7 @@
 
             <pre id="supabase-sql-snippet" class="p-3.5 rounded-xl bg-slate-900 text-teal-200 text-[11px] font-mono overflow-x-auto leading-relaxed">CREATE TABLE IF NOT EXISTS public.data_utama (
   id TEXT PRIMARY KEY,
-  tipe_data TEXT NOT NULL CHECK (tipe_data IN ('kader', 'pelatihan')),
+  tipe_data TEXT NOT NULL CHECK (tipe_data IN ('kader', 'pelatihan', 'kki')),
   payload JSONB NOT NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -1108,7 +1313,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#e6eee9] text-[#0f766e] border border-[#b8cdc1]">Langkah 1</span>
                 <h4 class="text-sm font-extrabold text-slate-900">Unduh Template Excel (.xlsx)</h4>
                 <p class="text-xs text-slate-600 leading-relaxed">
-                  Template sudah dilengkapi contoh pengisian, daftar DPD & Marhalah valid, serta daftar kode Daurah/Pelatihan dari laman Master.
+                  Template sudah dilengkapi contoh pengisian, daftar DPD & Marhalah valid, daftar KKI & Murabbi, serta kode Daurah/Pelatihan dari laman Master.
                 </p>
               </div>
               <button type="button" onclick="downloadExcelTemplate()" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#e6eee9] text-[#0f766e] border border-[#9eb9aa] text-xs sm:text-sm font-bold shadow-2xs transition-colors cursor-pointer">
@@ -1160,6 +1365,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
                       <th class="py-2.5 px-3">Baris</th>
                       <th class="py-2.5 px-3 whitespace-nowrap">No. Induk (Otomatis)</th>
                       <th class="py-2.5 px-3">Nama Lengkap</th>
+                      <th class="py-2.5 px-3">KKI / Murabbi</th>
                       <th class="py-2.5 px-3">DPD / DPC</th>
                       <th class="py-2.5 px-3">Marhalah</th>
                       <th class="py-2.5 px-3">No. WhatsApp</th>
@@ -1191,11 +1397,133 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
   </div>
 
   <!-- ======================================================================= -->
+  <!-- MODAL 6: DETAIL & PENGELOLAAN HALAQAH (KLIK "LIHAT" PADA BOX KKI)       -->
+  <!-- ======================================================================= -->
+  <div id="modal-halaqah-detail" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="halaqah-modal-title">
+    <div class="min-h-screen px-4 py-6 flex items-center justify-center">
+      <div onclick="closeHalaqahDetailModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+
+      <div class="relative bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-[#d5e0d9] overflow-hidden z-10">
+
+        <!-- Header Modal Halaqah -->
+        <div class="bg-teal-sage-gradient px-6 py-4 text-white flex items-start justify-between gap-4">
+          <div class="space-y-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/25">Detail Halaqah / KKI</span>
+              <span id="halaqah-modal-count-badge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-black/20 text-white">0 Mutarabbi</span>
+            </div>
+            <h3 id="halaqah-modal-title" class="text-lg sm:text-xl font-extrabold tracking-tight text-white truncate">Nama KKI</h3>
+            <p id="halaqah-modal-murabbi-sub" class="text-xs text-white/90 truncate">Murabbi: -</p>
+          </div>
+
+          <button type="button" onclick="closeHalaqahDetailModal()" class="p-2 rounded-xl text-white/80 hover:bg-white/15 hover:text-white transition-colors cursor-pointer shrink-0" aria-label="Tutup Detail Halaqah">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Body Modal Halaqah -->
+        <div class="p-6 space-y-6 max-h-[82vh] overflow-y-auto">
+          <input type="hidden" id="halaqah-active-kki-id" value="" />
+
+          <!-- Informasi Utama KKI (Nama KKI & Murabbi dari Master + Field Edit Langsung) -->
+          <div class="space-y-3.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Nama KKI (Read-only dari Master) -->
+              <div class="p-3.5 rounded-xl bg-[#e6eee9]/70 border border-[#bfd1c6]">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#0f766e] block">Nama KKI (Master)</span>
+                <span id="halaqah-info-nama-kki" class="text-sm font-extrabold text-slate-900 mt-0.5 block">-</span>
+              </div>
+
+              <!-- Nama Murabbi (Read-only dari Master) -->
+              <div class="p-3.5 rounded-xl bg-[#e6eee9]/70 border border-[#bfd1c6]">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#0f766e] block">Nama Murabbi (Master)</span>
+                <span id="halaqah-info-nama-murabbi" class="text-sm font-extrabold text-slate-900 mt-0.5 block">-</span>
+              </div>
+            </div>
+
+            <!-- Form Edit Langsung: Tahun Terbentuk, Hari Tarbiyah, Jam Tarbiyah -->
+            <div class="p-4 rounded-2xl bg-[#f4f7f5] border border-[#cddcd3] space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-[#0f766e]">Informasi Jadwal & Sejarah Halaqah (Edit Langsung)</span>
+                <span id="halaqah-save-indicator" class="text-[11px] font-semibold text-[#5f8575]">Perubahan tersimpan otomatis</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label for="halaqah-edit-tahun" class="block text-xs font-bold text-slate-700 mb-1">Tahun Terbentuk</label>
+                  <input type="number" id="halaqah-edit-tahun" min="1990" max="2099" placeholder="Contoh: 2022" onchange="saveHalaqahMetaChanges()" class="w-full px-3 py-2 bg-white border border-[#cddcd3] rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+                </div>
+
+                <div>
+                  <label for="halaqah-edit-hari" class="block text-xs font-bold text-slate-700 mb-1">Hari Tarbiyah</label>
+                  <select id="halaqah-edit-hari" onchange="saveHalaqahMetaChanges()" class="w-full px-3 py-2 bg-white border border-[#cddcd3] rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f766e]">
+                    <option value="">-- Pilih Hari --</option>
+                    <option value="Senin">Senin</option>
+                    <option value="Selasa">Selasa</option>
+                    <option value="Rabu">Rabu</option>
+                    <option value="Kamis">Kamis</option>
+                    <option value="Jumat">Jumat</option>
+                    <option value="Sabtu">Sabtu</option>
+                    <option value="Ahad">Ahad</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="halaqah-edit-jam" class="block text-xs font-bold text-slate-700 mb-1">Jam Tarbiyah</label>
+                  <input type="text" id="halaqah-edit-jam" placeholder="Contoh: 16:00 WITA" onchange="saveHalaqahMetaChanges()" class="w-full px-3 py-2 bg-white border border-[#cddcd3] rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f766e]" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daftar Kader Terdaftar pada KKI & Penentuan Jabatan Naqib / Sekretaris / Bendahara -->
+          <div class="space-y-3 pt-2 border-t border-[#d5e0d9]">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#0f766e]">Daftar Kader (Mutarabbi) Terdaftar</h4>
+                <p class="text-xs text-slate-500 mt-0.5">Klik nama kader di bawah ini untuk menentukan jabatan <strong>Naqib</strong>, <strong>Sekretaris</strong>, atau <strong>Bendahara</strong>.</p>
+              </div>
+
+              <!-- Legenda Warna Jabatan -->
+              <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
+                <span class="px-2.5 py-0.5 rounded-full bg-orange-500 text-white">Naqib</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-blue-600 text-white">Sekretaris</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white">Bendahara</span>
+              </div>
+            </div>
+
+            <div id="halaqah-kader-list" class="space-y-2">
+              <!-- Diisi dinamis oleh JS -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer Modal Halaqah -->
+        <div class="px-6 py-4 bg-[#f4f7f5] border-t border-[#d5e0d9] flex items-center justify-between gap-3">
+          <span class="text-[11px] text-slate-500">Data tersinkronisasi dengan Supabase & Backup GitHub</span>
+          <div class="flex items-center gap-2.5">
+            <button type="button" onclick="saveHalaqahMetaChanges(true)" class="px-4 py-2 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white text-xs sm:text-sm font-bold shadow-2xs cursor-pointer">
+              Simpan Perubahan
+            </button>
+            <button type="button" onclick="closeHalaqahDetailModal()" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-[#cddcd3] text-xs sm:text-sm font-bold cursor-pointer">
+              Tutup
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
   <!-- JAVASCRIPT UTAMA SIKAD (DUAL-SYNC: SUPABASE + GITHUB REST API)          -->
   <!-- ======================================================================= -->
   <script>
     // =========================================================================
-    // 1. KONFIGURASI SUPABASE & KONSTANTA STORAGE
+    // 1. KONFIGURASI SUPABASE, KONSTANTA STORAGE, DPD & MARHALAH
     // =========================================================================
     const SUPABASE_URL = "https://zrpfcotcvbnmzvbtwyxr.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_gYCqrPIWJ3a2ZBS-v1-axw_UDwjmVZ5";
@@ -1204,6 +1532,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     const STORAGE_KEYS = {
       KADER_FALLBACK: 'sikad_sulbar_fallback_kader',
       PELATIHAN_FALLBACK: 'sikad_sulbar_fallback_pelatihan',
+      KKI_FALLBACK: 'sikad_sulbar_fallback_kki',
       GH_TOKEN: 'sikad_github_backup_token',
       GH_USERNAME: 'sikad_github_username',
       GH_REPO: 'sikad_github_repo',
@@ -1288,7 +1617,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     }
 
     // =========================================================================
-    // 2. DATA CONTOH BAWAAN (6 MASTER PELATIHAN & 18 KADER SULAWESI BARAT)
+    // 2. DATA CONTOH BAWAAN (6 MASTER PELATIHAN, 6 KKI & 18 KADER SULBAR)
     // =========================================================================
     const DEFAULT_PELATIHAN = [
       { id: 'PLT-01', kode: 'DT-01', nama: "Daurah Marhalah Ta'rifiyah" },
@@ -1297,6 +1626,63 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       { id: 'PLT-04', kode: 'DPH-01', nama: 'Daurah Pengelolaan Halaqah' },
       { id: 'PLT-05', kode: 'PDK-01', nama: 'Pelatihan Dai & Khotib' },
       { id: 'PLT-06', kode: 'MOK-01', nama: 'Manajemen Organisasi & Kepemimpinan' }
+    ];
+
+    const DEFAULT_KKI = [
+      {
+        id: 'KKI-01',
+        nama_kki: 'KKI Al-Fatih Mamuju',
+        nama_murabbi: 'Ust. H. Muhammad Ridwan, Lc., M.Ag.',
+        tahun_terbentuk: '2018',
+        hari_tarbiyah: 'Jumat',
+        jam_tarbiyah: '20:00 WITA',
+        pengurus: { naqib_seq: 5, sekretaris_seq: 11, bendahara_seq: 1 }
+      },
+      {
+        id: 'KKI-02',
+        nama_kki: 'KKI Khadijah binti Khuwailid',
+        nama_murabbi: 'Ustadzah Hj. St. Aisyah Nurdin, S.Pd.I., M.Pd.',
+        tahun_terbentuk: '2019',
+        hari_tarbiyah: 'Sabtu',
+        jam_tarbiyah: '16:00 WITA',
+        pengurus: { naqib_seq: 7, sekretaris_seq: 9, bendahara_seq: 12 }
+      },
+      {
+        id: 'KKI-03',
+        nama_kki: 'KKI Salahuddin Al-Ayyubi Polman',
+        nama_murabbi: 'Ust. Abdurrahman Baharuddin, S.Pd.I.',
+        tahun_terbentuk: '2020',
+        hari_tarbiyah: 'Ahad',
+        jam_tarbiyah: '09:00 WITA',
+        pengurus: { naqib_seq: 10, sekretaris_seq: 13, bendahara_seq: 18 }
+      },
+      {
+        id: 'KKI-04',
+        nama_kki: "KKI Imam Syafi'i Majene",
+        nama_murabbi: 'Ust. Dr. Syamsul Bahri, M.Pd.I.',
+        tahun_terbentuk: '2019',
+        hari_tarbiyah: 'Kamis',
+        jam_tarbiyah: '20:15 WITA',
+        pengurus: { naqib_seq: 4, sekretaris_seq: 15, bendahara_seq: null }
+      },
+      {
+        id: 'KKI-05',
+        nama_kki: "KKI Mush'ab bin Umair Pasangkayu",
+        nama_murabbi: 'Ust. Irfan Hakim, S.Sos.I.',
+        tahun_terbentuk: '2021',
+        hari_tarbiyah: 'Rabu',
+        jam_tarbiyah: '20:00 WITA',
+        pengurus: { naqib_seq: 6, sekretaris_seq: null, bendahara_seq: null }
+      },
+      {
+        id: 'KKI-06',
+        nama_kki: 'KKI Bilal bin Rabah Mateng',
+        nama_murabbi: 'Ust. Lukmanul Hakim, S.H.I.',
+        tahun_terbentuk: '2021',
+        hari_tarbiyah: 'Sabtu',
+        jam_tarbiyah: '20:00 WITA',
+        pengurus: { naqib_seq: 8, sekretaris_seq: 16, bendahara_seq: null }
+      }
     ];
 
     const DEFAULT_KADER = [
@@ -1308,6 +1694,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Mamuju',
         tanggal_lahir: '1983-04-12',
         no_whatsapp: '081242110001',
+        nama_kki: 'KKI Al-Fatih Mamuju',
+        nama_murabbi: 'Ust. Dr. Syamsul Bahri, M.Pd.I.',
         dpd: 'DPD Mamuju',
         dpc: 'DPC Simboro',
         alamat: 'Jl. Andi Makkasau No. 18, Kel. Rangas',
@@ -1324,6 +1712,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Majene',
         tanggal_lahir: '1986-09-21',
         no_whatsapp: '081355220002',
+        nama_kki: 'KKI Khadijah binti Khuwailid',
+        nama_murabbi: 'Ustadzah Hj. St. Aisyah Nurdin, S.Pd.I., M.Pd.',
         dpd: 'DPD Mamuju',
         dpc: 'DPC Mamuju',
         alamat: 'Jl. Abd. Malik Pattana Endeng, Kel. Binanga',
@@ -1340,6 +1730,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Polewali',
         tanggal_lahir: '1985-01-17',
         no_whatsapp: '081342440003',
+        nama_kki: 'KKI Salahuddin Al-Ayyubi Polman',
+        nama_murabbi: 'Ust. H. Muhammad Ridwan, Lc., M.Ag.',
         dpd: 'DPD Polewali Mandar',
         dpc: 'DPC Polewali',
         alamat: 'Jl. Mr. Muh. Yamin No. 45, Kel. Pekkabata',
@@ -1356,6 +1748,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Majene',
         tanggal_lahir: '1981-11-05',
         no_whatsapp: '081241770004',
+        nama_kki: "KKI Imam Syafi'i Majene",
+        nama_murabbi: 'Ust. H. Muhammad Ridwan, Lc., M.Ag.',
         dpd: 'DPD Majene',
         dpc: 'DPC Banggae',
         alamat: 'Jl. Jenderal Sudirman No. 22, Kel. Baru',
@@ -1372,6 +1766,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Makassar',
         tanggal_lahir: '1990-06-14',
         no_whatsapp: '085242330005',
+        nama_kki: 'KKI Al-Fatih Mamuju',
+        nama_murabbi: 'Ust. H. Muhammad Ridwan, Lc., M.Ag.',
         dpd: 'DPD Mamuju',
         dpc: 'DPC Kalukku',
         alamat: 'Perum Griya Kalukku Asri Blok B4, Kel. Bebanga',
@@ -1388,6 +1784,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Pasangkayu',
         tanggal_lahir: '1988-03-29',
         no_whatsapp: '081340990006',
+        nama_kki: "KKI Mush'ab bin Umair Pasangkayu",
+        nama_murabbi: 'Ust. H. Muhammad Ridwan, Lc., M.Ag.',
         dpd: 'DPD Pasangkayu',
         dpc: 'DPC Pasangkayu',
         alamat: 'Jl. Ir. Soekarno No. 11, Kel. Pasangkayu',
@@ -1404,6 +1802,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Wonomulyo',
         tanggal_lahir: '1991-08-19',
         no_whatsapp: '085399550007',
+        nama_kki: 'KKI Khadijah binti Khuwailid',
+        nama_murabbi: 'Ustadzah Hj. St. Aisyah Nurdin, S.Pd.I., M.Pd.',
         dpd: 'DPD Polewali Mandar',
         dpc: 'DPC Wonomulyo',
         alamat: 'Jl. Pendidikan No. 09, Kel. Sidodadi',
@@ -1420,6 +1820,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Topoyo',
         tanggal_lahir: '1989-12-03',
         no_whatsapp: '081245110008',
+        nama_kki: 'KKI Bilal bin Rabah Mateng',
+        nama_murabbi: 'Ust. H. Muhammad Ridwan, Lc., M.Ag.',
         dpd: 'DPD Mamuju Tengah',
         dpc: 'DPC Tobadak',
         alamat: 'Dusun Mahahe, Desa Tobadak',
@@ -1436,6 +1838,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Majene',
         tanggal_lahir: '1993-02-25',
         no_whatsapp: '085255880009',
+        nama_kki: 'KKI Khadijah binti Khuwailid',
+        nama_murabbi: 'Ustadzah Hj. St. Aisyah Nurdin, S.Pd.I., M.Pd.',
         dpd: 'DPD Majene',
         dpc: 'DPC Pamboang',
         alamat: 'Jl. Poros Majene-Mamuju, Kel. Lalampanua',
@@ -1452,6 +1856,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Mamasa',
         tanggal_lahir: '1987-07-08',
         no_whatsapp: '081354130010',
+        nama_kki: 'KKI Salahuddin Al-Ayyubi Polman',
+        nama_murabbi: 'Ust. Abdurrahman Baharuddin, S.Pd.I.',
         dpd: 'DPD Mamasa',
         dpc: 'DPC Mamasa',
         alamat: 'Jl. Demmatande No. 31, Kel. Mamasa',
@@ -1468,6 +1874,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Mamuju',
         tanggal_lahir: '1992-05-16',
         no_whatsapp: '081142150011',
+        nama_kki: 'KKI Al-Fatih Mamuju',
+        nama_murabbi: 'Ust. H. Muhammad Ridwan, Lc., M.Ag.',
         dpd: 'DPD Mamuju',
         dpc: 'DPC Mamuju',
         alamat: 'Jl. Yos Sudarso No. 77, Kel. Rimuku',
@@ -1484,6 +1892,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Baras',
         tanggal_lahir: '1994-10-11',
         no_whatsapp: '082290100012',
+        nama_kki: 'KKI Khadijah binti Khuwailid',
+        nama_murabbi: 'Ustadzah Hj. St. Aisyah Nurdin, S.Pd.I., M.Pd.',
         dpd: 'DPD Pasangkayu',
         dpc: 'DPC Baras',
         alamat: 'Jl. Trans Sulawesi KM 14, Desa Motu',
@@ -1500,6 +1910,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Campalagian',
         tanggal_lahir: '1995-01-30',
         no_whatsapp: '082188660013',
+        nama_kki: 'KKI Salahuddin Al-Ayyubi Polman',
+        nama_murabbi: 'Ust. Abdurrahman Baharuddin, S.Pd.I.',
         dpd: 'DPD Polewali Mandar',
         dpc: 'DPC Campalagian',
         alamat: 'Jl. Poros Polewali-Majene, Desa Bonde',
@@ -1516,6 +1928,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Sumarorong',
         tanggal_lahir: '1996-04-02',
         no_whatsapp: '085298140014',
+        nama_kki: 'KKI Khadijah binti Khuwailid',
+        nama_murabbi: 'Ustadzah Hj. St. Aisyah Nurdin, S.Pd.I., M.Pd.',
         dpd: 'DPD Mamasa',
         dpc: 'DPC Sumarorong',
         alamat: 'Lingkungan Tadisi, Kel. Sumarorong',
@@ -1532,6 +1946,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Sendana',
         tanggal_lahir: '1997-08-23',
         no_whatsapp: '082348160015',
+        nama_kki: "KKI Imam Syafi'i Majene",
+        nama_murabbi: 'Ust. Dr. Syamsul Bahri, M.Pd.I.',
         dpd: 'DPD Majene',
         dpc: 'DPC Sendana',
         alamat: 'Jl. Pendidikan Somba, Kel. Mosso Dhua',
@@ -1548,6 +1964,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Topoyo',
         tanggal_lahir: '1994-06-19',
         no_whatsapp: '085342160016',
+        nama_kki: 'KKI Bilal bin Rabah Mateng',
+        nama_murabbi: 'Ust. Lukmanul Hakim, S.H.I.',
         dpd: 'DPD Mamuju Tengah',
         dpc: 'DPC Topoyo',
         alamat: 'Jl. Poros Benteng, Desa Topoyo',
@@ -1564,6 +1982,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Budong-Budong',
         tanggal_lahir: '1998-11-27',
         no_whatsapp: '085341120017',
+        nama_kki: 'KKI Khadijah binti Khuwailid',
+        nama_murabbi: 'Ustadzah Hj. St. Aisyah Nurdin, S.Pd.I., M.Pd.',
         dpd: 'DPD Mamuju Tengah',
         dpc: 'DPC Budong-Budong',
         alamat: 'Dusun Babana Timur, Desa Babana',
@@ -1580,6 +2000,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: 'Tinambung',
         tanggal_lahir: '2001-12-09',
         no_whatsapp: '082251180018',
+        nama_kki: 'KKI Salahuddin Al-Ayyubi Polman',
+        nama_murabbi: 'Ust. Abdurrahman Baharuddin, S.Pd.I.',
         dpd: 'DPD Polewali Mandar',
         dpc: 'DPC Tinambung',
         alamat: 'Jl. Syekh Hasan Yamani, Kel. Tinambung',
@@ -1591,290 +2013,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     ];
 
     // =========================================================================
-    // 10. LAMAN 1: DASHBOARD ANALITIK (MULTI-WARNA & FILTER DPD / MARHALAH)
-    // =========================================================================
-    function destroyChartSafely(instance) {
-      if (instance && typeof instance.destroy === 'function') {
-        try {
-          instance.destroy();
-        } catch (err) {
-          console.warn('Peringatan saat destroy Chart.js:', err);
-        }
-      }
-      return null;
-    }
-
-    function getDashboardFilteredKader() {
-      const selectedDpd = document.getElementById('dashboard-filter-dpd')?.value || 'ALL';
-      const selectedMarhalah = document.getElementById('dashboard-filter-marhalah')?.value || 'ALL';
-
-      return kaderList.filter(k => {
-        const matchDpd = selectedDpd === 'ALL' || k.dpd === selectedDpd;
-        const matchMarhalah = selectedMarhalah === 'ALL' || k.marhalah === selectedMarhalah;
-        return matchDpd && matchMarhalah;
-      });
-    }
-
-    function resetDashboardFilter() {
-      const dpdSel = document.getElementById('dashboard-filter-dpd');
-      const mrhSel = document.getElementById('dashboard-filter-marhalah');
-      if (dpdSel) dpdSel.value = 'ALL';
-      if (mrhSel) mrhSel.value = 'ALL';
-      renderDashboard();
-    }
-
-    function updateDashboardMetricsOnly() {
-      const selectedDpd = document.getElementById('dashboard-filter-dpd')?.value || 'ALL';
-      const selectedMarhalah = document.getElementById('dashboard-filter-marhalah')?.value || 'ALL';
-      const filtered = getDashboardFilteredKader();
-
-      // Update indikator ringkasan filter & tombol reset
-      const summaryEl = document.getElementById('dashboard-filter-summary');
-      const resetBtn = document.getElementById('btn-reset-dashboard-filter');
-      const isFiltered = selectedDpd !== 'ALL' || selectedMarhalah !== 'ALL';
-
-      if (summaryEl) {
-        const dpdLabel = selectedDpd === 'ALL' ? 'Semua DPD' : selectedDpd;
-        const mrhLabel = selectedMarhalah === 'ALL' ? 'Semua Marhalah' : `Marhalah ${selectedMarhalah}`;
-        summaryEl.textContent = `${dpdLabel} • ${mrhLabel} (${filtered.length} kader)`;
-      }
-      if (resetBtn) {
-        if (isFiltered) resetBtn.classList.remove('hidden');
-        else resetBtn.classList.add('hidden');
-      }
-
-      const total = filtered.length;
-      const aktifCount = filtered.filter(k => k.status === 'Aktif').length;
-      const kurangAktifCount = filtered.filter(k => k.status === 'Kurang Aktif').length;
-      const ikhwanCount = filtered.filter(k => k.jenis_kelamin === 'Ikhwan').length;
-      const akhwatCount = filtered.filter(k => k.jenis_kelamin === 'Akhwat').length;
-
-      const aktifPct = total > 0 ? ((aktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
-      const kurangAktifPct = total > 0 ? ((kurangAktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
-
-      document.getElementById('kpi-total-kader').textContent = total;
-      document.getElementById('kpi-gender-sub').textContent = `${ikhwanCount} Ikhwan • ${akhwatCount} Akhwat`;
-      document.getElementById('kpi-kader-aktif').textContent = aktifCount;
-      document.getElementById('kpi-kader-aktif-pct').textContent = `${aktifPct}%`;
-      document.getElementById('kpi-kader-kurang-aktif').textContent = kurangAktifCount;
-      document.getElementById('kpi-kader-kurang-aktif-pct').textContent = `${kurangAktifPct}%`;
-      document.getElementById('kpi-total-pelatihan').textContent = pelatihanList.length;
-
-      // Ringkasan 6 DPD Sulawesi Barat (berdasarkan data terfilter)
-      const dpdListEl = document.getElementById('dpd-breakdown-list');
-      if (dpdListEl) {
-        dpdListEl.innerHTML = DPD_LIST.map((dpdName, idx) => {
-          const count = filtered.filter(k => k.dpd === dpdName).length;
-          const shortName = dpdName.replace('DPD ', '');
-          const dotColor = DPD_COLORS[idx % DPD_COLORS.length];
-          return `
-            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
-              <div class="flex items-center gap-1.5 min-w-0">
-                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${dotColor};"></span>
-                <span class="font-semibold text-slate-700 truncate">${escapeHtml(shortName)}</span>
-              </div>
-              <span class="font-extrabold text-slate-900 tabular-nums ml-1.5">${count}</span>
-            </div>
-          `;
-        }).join('');
-      }
-
-      // Rincian 6 Jenjang Marhalah (berdasarkan data terfilter)
-      const marhalahListEl = document.getElementById('marhalah-breakdown-list');
-      if (marhalahListEl) {
-        marhalahListEl.innerHTML = MARHALAH_LIST.map(m => {
-          const count = filtered.filter(k => k.marhalah === m.label).length;
-          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-          return `
-            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
-              <div class="flex items-center gap-2 min-w-0">
-                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${m.color};"></span>
-                <span class="font-bold text-slate-800 truncate">${escapeHtml(m.label)}</span>
-                <span class="font-mono text-[10px] text-slate-500">(${m.code})</span>
-              </div>
-              <span class="font-extrabold text-slate-900 tabular-nums ml-1">${count} <span class="font-normal text-slate-400">(${pct}%)</span></span>
-            </div>
-          `;
-        }).join('');
-      }
-
-      // Progress Bar Statistik Partisipasi Daurah & Pelatihan (berdasarkan data terfilter)
-      const progressListEl = document.getElementById('pelatihan-progress-list');
-      if (progressListEl) {
-        if (pelatihanList.length === 0) {
-          progressListEl.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada program pelatihan terdaftar pada laman Master.</p>`;
-        } else {
-          progressListEl.innerHTML = pelatihanList.map((plt, idx) => {
-            const count = filtered.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(plt.id)).length;
-            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-            const barColor = PELATIHAN_COLORS[idx % PELATIHAN_COLORS.length];
-            return `
-              <div class="space-y-1">
-                <div class="flex items-center justify-between gap-2 text-xs">
-                  <span class="font-bold text-slate-800 truncate flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${barColor};"></span>
-                    <span class="font-mono" style="color: ${barColor};">[${escapeHtml(plt.kode)}]</span>
-                    <span class="truncate">${escapeHtml(plt.nama)}</span>
-                  </span>
-                  <span class="font-extrabold text-slate-900 whitespace-nowrap tabular-nums">${count}/${total} (${pct}%)</span>
-                </div>
-                <div class="w-full h-2 rounded-full bg-[#e6eee9] overflow-hidden">
-                  <div class="h-full rounded-full transition-all duration-300" style="width: ${pct}%; background-color: ${barColor};"></div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-      }
-    }
-
-    function renderDashboard() {
-      updateDashboardMetricsOnly();
-
-      if (typeof window.Chart === 'undefined') return;
-
-      const filtered = getDashboardFilteredKader();
-
-      // 1. Grafik Batang Multi-Warna: Sebaran Total Kader per DPD
-      const dpdCanvas = document.getElementById('chart-dpd');
-      if (dpdCanvas) {
-        chartDpdInstance = destroyChartSafely(chartDpdInstance);
-        const dpdLabels = DPD_LIST.map(d => d.replace('DPD ', ''));
-        const dpdCounts = DPD_LIST.map(d => filtered.filter(k => k.dpd === d).length);
-
-        chartDpdInstance = new Chart(dpdCanvas, {
-          type: 'bar',
-          data: {
-            labels: dpdLabels,
-            datasets: [
-              {
-                label: 'Jumlah Kader',
-                data: dpdCounts,
-                backgroundColor: DPD_COLORS,
-                borderRadius: 8,
-                maxBarThickness: 44
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  title: (items) => 'DPD ' + items[0].label,
-                  label: (ctx) => ` Total Kader: ${ctx.parsed.y} orang`
-                }
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
-                grid: { color: '#e6eee9' }
-              },
-              x: {
-                ticks: { color: '#334155', font: { size: 11, weight: '600' } },
-                grid: { display: false }
-              }
-            }
-          }
-        });
-      }
-
-      // 2. Grafik Donat Multi-Warna: Jumlah Kader Berdasarkan 6 Jenjang Marhalah
-      const marhalahCanvas = document.getElementById('chart-marhalah');
-      if (marhalahCanvas) {
-        chartMarhalahInstance = destroyChartSafely(chartMarhalahInstance);
-        const mLabels = MARHALAH_LIST.map(m => `${m.label} (${m.code})`);
-        const mCounts = MARHALAH_LIST.map(m => filtered.filter(k => k.marhalah === m.label).length);
-        const mColors = MARHALAH_LIST.map(m => m.color);
-        const hasAnyData = mCounts.some(c => c > 0);
-
-        chartMarhalahInstance = new Chart(marhalahCanvas, {
-          type: 'doughnut',
-          data: {
-            labels: hasAnyData ? mLabels : ['Belum ada data sesuai filter'],
-            datasets: [
-              {
-                data: hasAnyData ? mCounts : [1],
-                backgroundColor: hasAnyData ? mColors : ['#e2e8f0'],
-                borderWidth: 2,
-                borderColor: '#ffffff'
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '62%',
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => hasAnyData ? ` ${ctx.label}: ${ctx.parsed} kader` : ' 0 kader sesuai filter'
-                }
-              }
-            }
-          }
-        });
-      }
-
-      // 3. Grafik Batang Horizontal Multi-Warna: Statistik Partisipasi Daurah & Pelatihan
-      const pelatihanCanvas = document.getElementById('chart-pelatihan');
-      if (pelatihanCanvas) {
-        chartPelatihanInstance = destroyChartSafely(chartPelatihanInstance);
-        const pLabels = pelatihanList.map(p => `[${p.kode}] ${p.nama}`);
-        const pCounts = pelatihanList.map(p =>
-          filtered.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(p.id)).length
-        );
-        const pColors = pelatihanList.map((_, idx) => PELATIHAN_COLORS[idx % PELATIHAN_COLORS.length]);
-
-        chartPelatihanInstance = new Chart(pelatihanCanvas, {
-          type: 'bar',
-          data: {
-            labels: pLabels,
-            datasets: [
-              {
-                label: 'Kader Peserta',
-                data: pCounts,
-                backgroundColor: pColors,
-                borderRadius: 6,
-                barThickness: 20
-              }
-            ]
-          },
-          options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => ` Telah diikuti oleh ${ctx.parsed.x} kader`
-                }
-              }
-            },
-            scales: {
-              x: {
-                beginAtZero: true,
-                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
-                grid: { color: '#e6eee9' }
-              },
-              y: {
-                ticks: { color: '#1e293b', font: { size: 11, weight: '600' } },
-                grid: { display: false }
-              }
-            }
-          }
-        });
-      }
-    }
-
-    // =========================================================================
-    // 11. LAMAN 2: DIREKTORI KADER (BADGE MARHALAH BERBEDA WARNA & DETAIL)
+    // 3. STATE UTAMA APLIKASI & INISIALISASI SUPABASE
     // =========================================================================
     let supabaseClient = null;
     let isSupabaseConfigured = false;
@@ -1882,11 +2021,37 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
 
     let kaderList = [];
     let pelatihanList = [];
+    let kkiList = [];
     let currentPage = 'dashboard';
+    let activeMasterTab = 'pelatihan';
+    let activeRolePickerKaderSeq = null;
+
+    let dashboardSelectedDpds = [];
+    let dashboardSelectedMarhalahs = [];
+    let dashboardSelectedBarDpd = null;
 
     let chartDpdInstance = null;
     let chartMarhalahInstance = null;
     let chartPelatihanInstance = null;
+    let chartPelatihanDpdInstance = null;
+
+    function normalizeKkiRecord(raw, fallbackId = '') {
+      const p = raw || {};
+      const pengurusRaw = p.pengurus && typeof p.pengurus === 'object' ? p.pengurus : {};
+      return {
+        id: String(p.id || fallbackId),
+        nama_kki: String(p.nama_kki || ''),
+        nama_murabbi: String(p.nama_murabbi || ''),
+        tahun_terbentuk: String(p.tahun_terbentuk || ''),
+        hari_tarbiyah: String(p.hari_tarbiyah || ''),
+        jam_tarbiyah: String(p.jam_tarbiyah || ''),
+        pengurus: {
+          naqib_seq: pengurusRaw.naqib_seq != null ? Number(pengurusRaw.naqib_seq) : null,
+          sekretaris_seq: pengurusRaw.sekretaris_seq != null ? Number(pengurusRaw.sekretaris_seq) : null,
+          bendahara_seq: pengurusRaw.bendahara_seq != null ? Number(pengurusRaw.bendahara_seq) : null
+        }
+      };
+    }
 
     function initSupabaseClient() {
       const urlValid = typeof SUPABASE_URL === 'string' &&
@@ -2099,8 +2264,11 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     // =========================================================================
     function cloneDefaultData() {
       pelatihanList = DEFAULT_PELATIHAN.map(item => ({ ...item }));
+      kkiList = DEFAULT_KKI.map(item => normalizeKkiRecord(item, item.id));
       kaderList = DEFAULT_KADER.map(item => ({
         ...item,
+        nama_kki: item.nama_kki || '',
+        nama_murabbi: item.nama_murabbi || '',
         id_kader: formatKaderId(item.marhalah, item.reg_seq),
         pelatihan_ids: [...item.pelatihan_ids]
       }));
@@ -2109,6 +2277,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     function saveFallbackToLocalStorage() {
       try {
         localStorage.setItem(STORAGE_KEYS.PELATIHAN_FALLBACK, JSON.stringify(pelatihanList));
+        localStorage.setItem(STORAGE_KEYS.KKI_FALLBACK, JSON.stringify(kkiList));
         localStorage.setItem(STORAGE_KEYS.KADER_FALLBACK, JSON.stringify(kaderList));
       } catch (err) {
         console.warn('Gagal menyimpan cache lokal:', err);
@@ -2119,11 +2288,16 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       try {
         const rawP = localStorage.getItem(STORAGE_KEYS.PELATIHAN_FALLBACK);
         const rawK = localStorage.getItem(STORAGE_KEYS.KADER_FALLBACK);
+        const rawKki = localStorage.getItem(STORAGE_KEYS.KKI_FALLBACK);
         if (rawP && rawK) {
           const parsedP = JSON.parse(rawP);
           const parsedK = JSON.parse(rawK);
+          const parsedKki = rawKki ? JSON.parse(rawKki) : DEFAULT_KKI;
           if (Array.isArray(parsedP) && Array.isArray(parsedK)) {
             pelatihanList = parsedP;
+            kkiList = Array.isArray(parsedKki)
+              ? parsedKki.map((item, idx) => normalizeKkiRecord(item, `KKI-${idx + 1}`))
+              : [];
             kaderList = parsedK.map((k, idx) => {
               const seq = Number(k.reg_seq) || (idx + 1);
               const marhalah = MARHALAH_LIST.some(m => m.label === k.marhalah) ? k.marhalah : "Pra-Ta'rif";
@@ -2131,6 +2305,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
                 ...k,
                 reg_seq: seq,
                 id_kader: formatKaderId(marhalah, seq),
+                nama_kki: String(k.nama_kki || ''),
+                nama_murabbi: String(k.nama_murabbi || ''),
                 pelatihan_ids: Array.isArray(k.pelatihan_ids) ? k.pelatihan_ids : []
               };
             });
@@ -2161,6 +2337,19 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         });
       });
 
+      kkiList.forEach(kki => {
+        const normKki = normalizeKkiRecord(kki, kki.id);
+        rows.push({
+          id: normKki.id,
+          tipe_data: 'kki',
+          payload: {
+            _entity: 'kki',
+            ...normKki
+          },
+          updated_at: nowIso
+        });
+      });
+
       kaderList.forEach(k => {
         const dbId = makeKaderDbId(k.reg_seq);
         rows.push({
@@ -2174,6 +2363,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
             tempat_lahir: k.tempat_lahir,
             tanggal_lahir: k.tanggal_lahir,
             no_whatsapp: k.no_whatsapp,
+            nama_kki: k.nama_kki || '',
+            nama_murabbi: k.nama_murabbi || '',
             dpd: k.dpd,
             dpc: k.dpc,
             alamat: k.alamat,
@@ -2191,13 +2382,17 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
 
     function hydrateStateFromRows(rows) {
       const nextPelatihan = [];
+      const nextKki = [];
       const nextKader = [];
 
       (rows || []).forEach(row => {
         if (!row || !row.payload) return;
         const p = row.payload;
+        const isKkiRow = row.tipe_data === 'kki' || p._entity === 'kki' || String(row.id).startsWith('KKI-');
 
-        if (row.tipe_data === 'pelatihan') {
+        if (isKkiRow) {
+          nextKki.push(normalizeKkiRecord(p, row.id));
+        } else if (row.tipe_data === 'pelatihan') {
           nextPelatihan.push({
             id: String(p.id || row.id),
             kode: String(p.kode || '-'),
@@ -2214,6 +2409,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
             tempat_lahir: String(p.tempat_lahir || ''),
             tanggal_lahir: String(p.tanggal_lahir || ''),
             no_whatsapp: String(p.no_whatsapp || ''),
+            nama_kki: String(p.nama_kki || ''),
+            nama_murabbi: String(p.nama_murabbi || ''),
             dpd: DPD_LIST.includes(p.dpd) ? p.dpd : DPD_LIST[0],
             dpc: String(p.dpc || ''),
             alamat: String(p.alamat || ''),
@@ -2227,6 +2424,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
 
       nextKader.sort((a, b) => Number(b.reg_seq) - Number(a.reg_seq));
       pelatihanList = nextPelatihan;
+      kkiList = nextKki;
       kaderList = nextKader;
       saveFallbackToLocalStorage();
     }
@@ -2269,9 +2467,21 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     // Simpan / Upsert baris ke Supabase lalu jalankan Auto-Backup GitHub
     async function upsertRowsToSupabaseAndBackup(rowsToUpsert) {
       if (isSupabaseConfigured && supabaseClient) {
-        const { error } = await supabaseClient
+        let { error } = await supabaseClient
           .from(SUPABASE_TABLE)
           .upsert(rowsToUpsert, { onConflict: 'id' });
+
+        if (error && String(error.message || '').toLowerCase().includes('check constraint')) {
+          const compatibleRows = rowsToUpsert.map(r =>
+            r.tipe_data === 'kki'
+              ? { ...r, tipe_data: 'pelatihan', payload: { ...r.payload, _entity: 'kki' } }
+              : r
+          );
+          const retry = await supabaseClient
+            .from(SUPABASE_TABLE)
+            .upsert(compatibleRows, { onConflict: 'id' });
+          error = retry.error;
+        }
 
         if (error) {
           throw new Error(error.message || 'Gagal menyimpan ke Supabase');
@@ -2281,7 +2491,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       }
 
       saveFallbackToLocalStorage();
-      // Jalankan sinkronisasi backup ke GitHub di latar belakang
       syncBackupToGitHub();
     }
 
@@ -2311,7 +2520,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       }
 
       saveFallbackToLocalStorage();
-      // Jalankan sinkronisasi backup ke GitHub di latar belakang
       syncBackupToGitHub();
     }
 
@@ -2332,7 +2540,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       return `https://api.github.com/repos/${safeUser}/${safeRepo}/contents/backup.json`;
     }
 
-    // Sinkronisasi latar belakang otomatis ke GitHub setelah CRUD berhasil
     async function syncBackupToGitHub() {
       const cfg = getGithubConfig();
       if (!cfg.token || !cfg.username || !cfg.repo) {
@@ -2343,7 +2550,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       refreshGithubBackupIndicator('syncing');
 
       try {
-        // 1. Ambil seluruh data terbaru dari tabel "data_utama" Supabase (atau state saat ini jika mode fallback)
         let latestRows = [];
         if (isSupabaseConfigured && supabaseClient) {
           const { data, error } = await supabaseClient
@@ -2357,7 +2563,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           latestRows = buildRowsFromCurrentState();
         }
 
-        // 2. Ubah ke format JSON rapi & encode ke Base64 (UTF-8 safe)
         const jsonPretty = JSON.stringify(latestRows, null, 2);
         const base64Content = utf8ToBase64(jsonPretty);
 
@@ -2368,7 +2573,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           'Content-Type': 'application/json'
         };
 
-        // 3. Cek nilai "sha" terbaru file backup.json di GitHub (jika file sudah ada)
         let currentSha = null;
         const getResp = await fetch(endpoint, {
           method: 'GET',
@@ -2386,7 +2590,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           throw new Error(errBody.message || `GitHub GET gagal (HTTP ${getResp.status})`);
         }
 
-        // 4. Kirim (PUT) ke file backup.json di GitHub menggunakan nilai "sha" terbaru
         const putPayload = {
           message: `Auto-backup SIKAD Sulbar (${new Date().toISOString()})`,
           content: base64Content
@@ -2406,7 +2609,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           throw new Error(errPut.message || `GitHub PUT gagal (HTTP ${putResp.status})`);
         }
 
-        // 5. Perbarui waktu terakhir berhasil backup di localStorage & indikator header
         localStorage.setItem(STORAGE_KEYS.GH_LAST_BACKUP, String(Date.now()));
         refreshGithubBackupIndicator();
       } catch (err) {
@@ -2416,7 +2618,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       }
     }
 
-    // Fitur Pemulihan (Restore dari Backup GitHub)
     function confirmRestoreFromGitHub() {
       const cfg = getGithubConfig();
       if (!cfg.token || !cfg.username || !cfg.repo) {
@@ -2461,7 +2662,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           throw new Error('Konten file backup.json kosong atau tidak ditemukan.');
         }
 
-        // Decode dari Base64 (UTF-8 safe) & parse JSON
         const decodedStr = base64ToUtf8(fileJson.content);
         const parsed = JSON.parse(decodedStr);
         const rawRecords = Array.isArray(parsed)
@@ -2474,11 +2674,11 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
 
         const nowIso = new Date().toISOString();
         const validRecords = rawRecords
-          .filter(r => r && r.id && (r.tipe_data === 'kader' || r.tipe_data === 'pelatihan') && r.payload)
+          .filter(r => r && r.id && (r.tipe_data === 'kader' || r.tipe_data === 'pelatihan' || r.tipe_data === 'kki') && r.payload)
           .map(r => ({
             id: String(r.id),
             tipe_data: r.tipe_data,
-            payload: r.payload,
+            payload: r.tipe_data === 'kki' ? { ...r.payload, _entity: 'kki' } : r.payload,
             updated_at: r.updated_at || nowIso
           }));
 
@@ -2486,11 +2686,22 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           throw new Error('Tidak ada baris data valid di dalam backup.json.');
         }
 
-        // Masukkan kembali ke tabel Supabase menggunakan metode .upsert()
         if (isSupabaseConfigured && supabaseClient) {
-          const { error } = await supabaseClient
+          let { error } = await supabaseClient
             .from(SUPABASE_TABLE)
             .upsert(validRecords, { onConflict: 'id' });
+
+          if (error && String(error.message || '').toLowerCase().includes('check constraint')) {
+            const compatibleRecords = validRecords.map(r =>
+              r.tipe_data === 'kki'
+                ? { ...r, tipe_data: 'pelatihan', payload: { ...r.payload, _entity: 'kki' } }
+                : r
+            );
+            const retry = await supabaseClient
+              .from(SUPABASE_TABLE)
+              .upsert(compatibleRecords, { onConflict: 'id' });
+            error = retry.error;
+          }
 
           if (error) {
             throw new Error(error.message || 'Gagal melakukan .upsert() ke Supabase');
@@ -2604,7 +2815,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     }
 
     // =========================================================================
-    // 9. NAVIGASI ANTAR 3 LAMAN & SIDEBAR MOBILE
+    // 9. NAVIGASI ANTAR 4 LAMAN & SIDEBAR MOBILE
     // =========================================================================
     function toggleMobileSidebar(open) {
       const sidebar = document.getElementById('app-sidebar');
@@ -2636,11 +2847,17 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           breadcrumb: 'Direktori Kader',
           title: 'Direktori Kader Sulawesi Barat'
         },
+        halaqah: {
+          el: document.getElementById('page-halaqah'),
+          nav: document.getElementById('nav-halaqah'),
+          breadcrumb: 'Halaqah',
+          title: 'Halaqah — Kelompok Kaderisasi Islamiyah (KKI)'
+        },
         master: {
           el: document.getElementById('page-master'),
           nav: document.getElementById('nav-master'),
-          breadcrumb: 'Master Daurah & Pelatihan',
-          title: 'Master Daurah & Pelatihan'
+          breadcrumb: 'Master Pelatihan & KKI',
+          title: 'Master Daurah, Pelatihan & KKI'
         }
       };
 
@@ -2669,8 +2886,11 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         renderDashboard();
       } else if (pageKey === 'direktori') {
         renderDirektoriTable();
+      } else if (pageKey === 'halaqah') {
+        renderHalaqahGrid();
       } else if (pageKey === 'master') {
         renderMasterTable();
+        renderMasterKkiTable();
       }
     }
 
@@ -2681,7 +2901,612 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         updateDashboardMetricsOnly();
       }
       renderDirektoriTable();
+      renderHalaqahGrid();
       renderMasterTable();
+      renderMasterKkiTable();
+
+      const activeHalaqahId = document.getElementById('halaqah-active-kki-id')?.value;
+      const halaqahModal = document.getElementById('modal-halaqah-detail');
+      if (activeHalaqahId && halaqahModal && !halaqahModal.classList.contains('hidden')) {
+        renderHalaqahKaderList(activeHalaqahId);
+      }
+    }
+
+    // =========================================================================
+    // 10. LAMAN 1: DASHBOARD ANALITIK (MULTI-PILIH DPD & MARHALAH)
+    // =========================================================================
+    function destroyChartSafely(instance) {
+      if (instance && typeof instance.destroy === 'function') {
+        try {
+          instance.destroy();
+        } catch (err) {
+          console.warn('Peringatan saat destroy Chart.js:', err);
+        }
+      }
+      return null;
+    }
+
+    function toggleDashboardDropdown(type, event) {
+      if (event) event.stopPropagation();
+      const dpdPanel = document.getElementById('dashboard-dpd-panel');
+      const mrhPanel = document.getElementById('dashboard-marhalah-panel');
+
+      if (type === 'dpd') {
+        if (mrhPanel) mrhPanel.classList.add('hidden');
+        if (dpdPanel) dpdPanel.classList.toggle('hidden');
+      } else if (type === 'marhalah') {
+        if (dpdPanel) dpdPanel.classList.add('hidden');
+        if (mrhPanel) mrhPanel.classList.toggle('hidden');
+      }
+    }
+
+    function closeAllDashboardDropdowns() {
+      document.getElementById('dashboard-dpd-panel')?.classList.add('hidden');
+      document.getElementById('dashboard-marhalah-panel')?.classList.add('hidden');
+    }
+
+    function renderDashboardFilterOptions() {
+      const dpdOptionsEl = document.getElementById('dashboard-dpd-options');
+      if (dpdOptionsEl) {
+        dpdOptionsEl.innerHTML = DPD_LIST.map((dpdName, idx) => {
+          const isChecked = dashboardSelectedDpds.includes(dpdName);
+          const color = DPD_COLORS[idx % DPD_COLORS.length];
+          return `
+            <label class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-[#f4f7f5] cursor-pointer text-xs font-semibold text-slate-700">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleDashboardDpdOption('${escapeHtml(dpdName)}')" class="w-4 h-4 rounded border-[#abc3b5] accent-[#0f766e] cursor-pointer shrink-0" />
+              <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${color};"></span>
+              <span class="truncate">${escapeHtml(dpdName)}</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      const mrhOptionsEl = document.getElementById('dashboard-marhalah-options');
+      if (mrhOptionsEl) {
+        mrhOptionsEl.innerHTML = MARHALAH_LIST.map(m => {
+          const isChecked = dashboardSelectedMarhalahs.includes(m.label);
+          return `
+            <label class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-[#f4f7f5] cursor-pointer text-xs font-semibold text-slate-700">
+              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleDashboardMarhalahOption('${escapeHtml(m.label)}')" class="w-4 h-4 rounded border-[#abc3b5] accent-[#0f766e] cursor-pointer shrink-0" />
+              <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${m.color};"></span>
+              <span class="truncate">${escapeHtml(m.label)} <span class="font-mono text-[10px] text-slate-400">(${m.code})</span></span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      const dpdBtnLabel = document.getElementById('dashboard-dpd-btn-label');
+      if (dpdBtnLabel) {
+        if (dashboardSelectedDpds.length === 0) {
+          dpdBtnLabel.textContent = 'Semua DPD (6 Kab. Sulbar)';
+        } else if (dashboardSelectedDpds.length === 1) {
+          dpdBtnLabel.textContent = dashboardSelectedDpds[0];
+        } else {
+          dpdBtnLabel.textContent = `${dashboardSelectedDpds.length} DPD Dipilih`;
+        }
+      }
+
+      const mrhBtnLabel = document.getElementById('dashboard-marhalah-btn-label');
+      if (mrhBtnLabel) {
+        if (dashboardSelectedMarhalahs.length === 0) {
+          mrhBtnLabel.textContent = 'Semua Jenjang Marhalah';
+        } else if (dashboardSelectedMarhalahs.length === 1) {
+          mrhBtnLabel.textContent = `Marhalah ${dashboardSelectedMarhalahs[0]}`;
+        } else {
+          mrhBtnLabel.textContent = `${dashboardSelectedMarhalahs.length} Marhalah Dipilih`;
+        }
+      }
+
+      // Sinkronkan opsi dropdown pelatihan untuk grafik Peserta Pelatihan per DPD
+      const pltSelectEl = document.getElementById('dashboard-select-pelatihan-dpd');
+      if (pltSelectEl) {
+        const previousVal = pltSelectEl.value;
+        if (pelatihanList.length === 0) {
+          pltSelectEl.innerHTML = `<option value="">-- Belum ada pelatihan terdaftar --</option>`;
+        } else {
+          pltSelectEl.innerHTML = pelatihanList.map(plt =>
+            `<option value="${escapeHtml(plt.id)}">[${escapeHtml(plt.kode)}] ${escapeHtml(plt.nama)}</option>`
+          ).join('');
+          if (previousVal && pelatihanList.some(p => p.id === previousVal)) {
+            pltSelectEl.value = previousVal;
+          } else {
+            pltSelectEl.value = pelatihanList[0].id;
+          }
+        }
+      }
+    }
+
+    function toggleDashboardDpdOption(dpdName) {
+      const idx = dashboardSelectedDpds.indexOf(dpdName);
+      if (idx === -1) {
+        dashboardSelectedDpds.push(dpdName);
+      } else {
+        dashboardSelectedDpds.splice(idx, 1);
+      }
+      renderDashboard();
+    }
+
+    function toggleDashboardMarhalahOption(marhalahLabel) {
+      const idx = dashboardSelectedMarhalahs.indexOf(marhalahLabel);
+      if (idx === -1) {
+        dashboardSelectedMarhalahs.push(marhalahLabel);
+      } else {
+        dashboardSelectedMarhalahs.splice(idx, 1);
+      }
+      renderDashboard();
+    }
+
+    function clearDashboardDpdSelection() {
+      dashboardSelectedDpds = [];
+      renderDashboard();
+    }
+
+    function clearDashboardMarhalahSelection() {
+      dashboardSelectedMarhalahs = [];
+      renderDashboard();
+    }
+
+    function getDashboardFilteredKader() {
+      return kaderList.filter(k => {
+        const matchDpd = dashboardSelectedDpds.length === 0 || dashboardSelectedDpds.includes(k.dpd);
+        const matchMarhalah = dashboardSelectedMarhalahs.length === 0 || dashboardSelectedMarhalahs.includes(k.marhalah);
+        return matchDpd && matchMarhalah;
+      });
+    }
+
+    function resetDashboardFilter() {
+      dashboardSelectedDpds = [];
+      dashboardSelectedMarhalahs = [];
+      dashboardSelectedBarDpd = null;
+      closeAllDashboardDropdowns();
+      renderDashboard();
+    }
+
+    function selectPelatihanDpdBar(dpdName) {
+      if (dashboardSelectedBarDpd === dpdName) {
+        dashboardSelectedBarDpd = null;
+      } else {
+        dashboardSelectedBarDpd = dpdName;
+      }
+      updateDashboardMetricsOnly();
+    }
+
+    function closePelatihanDpdKaderDetail() {
+      dashboardSelectedBarDpd = null;
+      updateDashboardMetricsOnly();
+    }
+
+    function renderPelatihanDpdKaderDetailPanel(selectedPlt, attendedFiltered) {
+      const detailPanel = document.getElementById('pelatihan-dpd-kader-detail');
+      if (!detailPanel) return;
+
+      if (!dashboardSelectedBarDpd || !selectedPlt || !DPD_LIST.includes(dashboardSelectedBarDpd)) {
+        detailPanel.classList.add('hidden');
+        detailPanel.innerHTML = '';
+        return;
+      }
+
+      const dpdIdx = DPD_LIST.indexOf(dashboardSelectedBarDpd);
+      const dpdColor = DPD_COLORS[dpdIdx % DPD_COLORS.length];
+      const matchingKader = attendedFiltered.filter(k => k.dpd === dashboardSelectedBarDpd);
+
+      const kaderListHtml = matchingKader.length === 0
+        ? `<div class="p-4 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9] text-center text-xs text-slate-500">
+             Belum ada kader pada <strong>${escapeHtml(dashboardSelectedBarDpd)}</strong> yang tercatat mengikuti pelatihan <strong>[${escapeHtml(selectedPlt.kode)}] ${escapeHtml(selectedPlt.nama)}</strong> (sesuai filter dashboard saat ini).
+           </div>`
+        : `<div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+             ${matchingKader.map((k, idx) => {
+               const mMeta = getMarhalahMeta(k.marhalah);
+               return `
+                 <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-[#f4f7f5] hover:bg-[#e6eee9]/80 border border-[#d5e0d9] transition-colors">
+                   <div class="flex items-center gap-2.5 min-w-0">
+                     <span class="w-6 h-6 rounded-full bg-white border border-[#cddcd3] text-[11px] font-extrabold text-slate-700 flex items-center justify-center shrink-0 tabular-nums">${idx + 1}</span>
+                     <div class="min-w-0">
+                       <button type="button" onclick="openDetailModal(${k.reg_seq})" class="text-xs sm:text-sm font-bold text-slate-900 hover:text-[#0f766e] hover:underline truncate block text-left cursor-pointer">
+                         ${escapeHtml(k.nama_lengkap)}
+                       </button>
+                       <span class="text-[11px] text-slate-500 truncate block">
+                         <span class="font-mono font-semibold text-[#0b4f4a]">${escapeHtml(k.id_kader)}</span> • ${escapeHtml(k.dpc || '-')}
+                       </span>
+                     </div>
+                   </div>
+
+                   <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold shrink-0 ${mMeta.badgeClass}">
+                     <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${mMeta.color};"></span>
+                     <span>${escapeHtml(k.marhalah)}</span>
+                   </span>
+                 </div>
+               `;
+             }).join('')}
+           </div>`;
+
+      detailPanel.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-[#f4f7f5] px-4 py-3 rounded-xl border border-[#cddcd3]">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${dpdColor};"></span>
+            <h4 class="text-xs sm:text-sm font-extrabold text-slate-900">
+              Rincian Peserta ${escapeHtml(dashboardSelectedBarDpd)} — <span class="text-[#0f766e]">[${escapeHtml(selectedPlt.kode)}] ${escapeHtml(selectedPlt.nama)}</span>
+            </h4>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#e6eee9] text-[#0f766e] border border-[#b8cdc1] tabular-nums">
+              ${matchingKader.length} Kader
+            </span>
+          </div>
+
+          <button type="button" onclick="closePelatihanDpdKaderDetail()" class="self-start sm:self-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-[#cddcd3] hover:border-rose-200 text-xs font-bold transition-colors cursor-pointer">
+            <span>Tutup Rincian</span>
+            <span>&times;</span>
+          </button>
+        </div>
+        ${kaderListHtml}
+      `;
+
+      detailPanel.classList.remove('hidden');
+    }
+
+    function updateDashboardMetricsOnly() {
+      renderDashboardFilterOptions();
+      const filtered = getDashboardFilteredKader();
+
+      const summaryEl = document.getElementById('dashboard-filter-summary');
+      const resetBtn = document.getElementById('btn-reset-dashboard-filter');
+      const isFiltered = dashboardSelectedDpds.length > 0 || dashboardSelectedMarhalahs.length > 0;
+
+      if (summaryEl) {
+        const dpdLabel = dashboardSelectedDpds.length === 0
+          ? 'Semua DPD'
+          : dashboardSelectedDpds.map(d => d.replace('DPD ', '')).join(', ');
+        const mrhLabel = dashboardSelectedMarhalahs.length === 0
+          ? 'Semua Marhalah'
+          : `Marhalah ${dashboardSelectedMarhalahs.join(', ')}`;
+        summaryEl.textContent = `${dpdLabel} • ${mrhLabel} (${filtered.length} kader)`;
+      }
+      if (resetBtn) {
+        if (isFiltered) resetBtn.classList.remove('hidden');
+        else resetBtn.classList.add('hidden');
+      }
+
+      const total = filtered.length;
+      const aktifCount = filtered.filter(k => k.status === 'Aktif').length;
+      const kurangAktifCount = filtered.filter(k => k.status === 'Kurang Aktif').length;
+      const ikhwanCount = filtered.filter(k => k.jenis_kelamin === 'Ikhwan').length;
+      const akhwatCount = filtered.filter(k => k.jenis_kelamin === 'Akhwat').length;
+
+      const aktifPct = total > 0 ? ((aktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
+      const kurangAktifPct = total > 0 ? ((kurangAktifCount / total) * 100).toFixed(1).replace(/\.0$/, '') : '0';
+
+      document.getElementById('kpi-total-kader').textContent = total;
+      document.getElementById('kpi-gender-sub').textContent = `${ikhwanCount} Ikhwan • ${akhwatCount} Akhwat`;
+      document.getElementById('kpi-kader-aktif').textContent = aktifCount;
+      document.getElementById('kpi-kader-aktif-pct').textContent = `${aktifPct}%`;
+      document.getElementById('kpi-kader-kurang-aktif').textContent = kurangAktifCount;
+      document.getElementById('kpi-kader-kurang-aktif-pct').textContent = `${kurangAktifPct}%`;
+      document.getElementById('kpi-total-pelatihan').textContent = pelatihanList.length;
+
+      // Ringkasan 6 DPD Sulawesi Barat
+      const dpdListEl = document.getElementById('dpd-breakdown-list');
+      if (dpdListEl) {
+        dpdListEl.innerHTML = DPD_LIST.map((dpdName, idx) => {
+          const count = filtered.filter(k => k.dpd === dpdName).length;
+          const shortName = dpdName.replace('DPD ', '');
+          const dotColor = DPD_COLORS[idx % DPD_COLORS.length];
+          return `
+            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${dotColor};"></span>
+                <span class="font-semibold text-slate-700 truncate">${escapeHtml(shortName)}</span>
+              </div>
+              <span class="font-extrabold text-slate-900 tabular-nums ml-1.5">${count}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Rincian 6 Jenjang Marhalah
+      const marhalahListEl = document.getElementById('marhalah-breakdown-list');
+      if (marhalahListEl) {
+        marhalahListEl.innerHTML = MARHALAH_LIST.map(m => {
+          const count = filtered.filter(k => k.marhalah === m.label).length;
+          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+          return `
+            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#f4f7f5] border border-[#d5e0d9] text-xs">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${m.color};"></span>
+                <span class="font-bold text-slate-800 truncate">${escapeHtml(m.label)}</span>
+                <span class="font-mono text-[10px] text-slate-500">(${m.code})</span>
+              </div>
+              <span class="font-extrabold text-slate-900 tabular-nums ml-1">${count} <span class="font-normal text-slate-400">(${pct}%)</span></span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Progress Bar Statistik Partisipasi Daurah & Pelatihan
+      const progressListEl = document.getElementById('pelatihan-progress-list');
+      if (progressListEl) {
+        if (pelatihanList.length === 0) {
+          progressListEl.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada program pelatihan terdaftar pada laman Master.</p>`;
+        } else {
+          progressListEl.innerHTML = pelatihanList.map((plt, idx) => {
+            const count = filtered.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(plt.id)).length;
+            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            const barColor = PELATIHAN_COLORS[idx % PELATIHAN_COLORS.length];
+            return `
+              <div class="space-y-1">
+                <div class="flex items-center justify-between gap-2 text-xs">
+                  <span class="font-bold text-slate-800 truncate flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${barColor};"></span>
+                    <span class="font-mono" style="color: ${barColor};">[${escapeHtml(plt.kode)}]</span>
+                    <span class="truncate">${escapeHtml(plt.nama)}</span>
+                  </span>
+                  <span class="font-extrabold text-slate-900 whitespace-nowrap tabular-nums">${count}/${total} (${pct}%)</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-[#e6eee9] overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-300" style="width: ${pct}%; background-color: ${barColor};"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Ringkasan Peserta Pelatihan Terpilih per DPD + Rincian Kader Jika Batang Grafik Diklik
+      const selectedPltId = document.getElementById('dashboard-select-pelatihan-dpd')?.value || '';
+      const selectedPlt = pelatihanList.find(p => p.id === selectedPltId);
+      const pltDpdSubEl = document.getElementById('chart-pelatihan-dpd-subtitle');
+      const pltDpdBreakdownEl = document.getElementById('pelatihan-dpd-breakdown-list');
+
+      if (selectedPlt) {
+        const attendedFiltered = filtered.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(selectedPlt.id));
+        if (pltDpdSubEl) {
+          pltDpdSubEl.innerHTML = `Jumlah kader yang telah mengikuti <strong class="text-[#0f766e]">[${escapeHtml(selectedPlt.kode)}] ${escapeHtml(selectedPlt.nama)}</strong> per DPD (Total: <strong>${attendedFiltered.length}</strong> kader)`;
+        }
+        if (pltDpdBreakdownEl) {
+          pltDpdBreakdownEl.innerHTML = DPD_LIST.map((dpdName, idx) => {
+            const count = attendedFiltered.filter(k => k.dpd === dpdName).length;
+            const shortName = dpdName.replace('DPD ', '');
+            const dotColor = DPD_COLORS[idx % DPD_COLORS.length];
+            const isSelectedBar = dashboardSelectedBarDpd === dpdName;
+            return `
+              <button type="button" onclick="selectPelatihanDpdBar('${escapeHtml(dpdName)}')" title="Klik untuk melihat rincian kader ${escapeHtml(dpdName)}" class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                isSelectedBar
+                  ? 'bg-[#e6eee9] border-2 border-[#0f766e] shadow-2xs'
+                  : 'bg-[#f4f7f5] hover:bg-[#e6eee9]/70 border border-[#d5e0d9]'
+              }">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${dotColor};"></span>
+                  <span class="font-semibold text-slate-700 truncate">${escapeHtml(shortName)}</span>
+                </div>
+                <span class="font-extrabold text-slate-900 tabular-nums ml-1.5">${count}</span>
+              </button>
+            `;
+          }).join('');
+        }
+        renderPelatihanDpdKaderDetailPanel(selectedPlt, attendedFiltered);
+      } else {
+        if (pltDpdSubEl) pltDpdSubEl.textContent = 'Belum ada program pelatihan yang dapat dipilih.';
+        if (pltDpdBreakdownEl) pltDpdBreakdownEl.innerHTML = '';
+        renderPelatihanDpdKaderDetailPanel(null, []);
+      }
+    }
+
+    function renderDashboard() {
+      updateDashboardMetricsOnly();
+
+      if (typeof window.Chart === 'undefined') return;
+
+      const filtered = getDashboardFilteredKader();
+
+      // 1. Grafik Batang Multi-Warna: Sebaran Total Kader per DPD
+      const dpdCanvas = document.getElementById('chart-dpd');
+      if (dpdCanvas) {
+        chartDpdInstance = destroyChartSafely(chartDpdInstance);
+        const dpdLabels = DPD_LIST.map(d => d.replace('DPD ', ''));
+        const dpdCounts = DPD_LIST.map(d => filtered.filter(k => k.dpd === d).length);
+
+        chartDpdInstance = new Chart(dpdCanvas, {
+          type: 'bar',
+          data: {
+            labels: dpdLabels,
+            datasets: [
+              {
+                label: 'Jumlah Kader',
+                data: dpdCounts,
+                backgroundColor: DPD_COLORS,
+                borderRadius: 8,
+                maxBarThickness: 44
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: (items) => 'DPD ' + items[0].label,
+                  label: (ctx) => ` Total Kader: ${ctx.parsed.y} orang`
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
+                grid: { color: '#e6eee9' }
+              },
+              x: {
+                ticks: { color: '#334155', font: { size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Grafik Donat Multi-Warna: Jumlah Kader Berdasarkan 6 Jenjang Marhalah
+      const marhalahCanvas = document.getElementById('chart-marhalah');
+      if (marhalahCanvas) {
+        chartMarhalahInstance = destroyChartSafely(chartMarhalahInstance);
+        const mLabels = MARHALAH_LIST.map(m => `${m.label} (${m.code})`);
+        const mCounts = MARHALAH_LIST.map(m => filtered.filter(k => k.marhalah === m.label).length);
+        const mColors = MARHALAH_LIST.map(m => m.color);
+        const hasAnyData = mCounts.some(c => c > 0);
+
+        chartMarhalahInstance = new Chart(marhalahCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: hasAnyData ? mLabels : ['Belum ada data sesuai filter'],
+            datasets: [
+              {
+                data: hasAnyData ? mCounts : [1],
+                backgroundColor: hasAnyData ? mColors : ['#e2e8f0'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => hasAnyData ? ` ${ctx.label}: ${ctx.parsed} kader` : ' 0 kader sesuai filter'
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // 3. Grafik Batang Horizontal Multi-Warna: Statistik Partisipasi Daurah & Pelatihan
+      const pelatihanCanvas = document.getElementById('chart-pelatihan');
+      if (pelatihanCanvas) {
+        chartPelatihanInstance = destroyChartSafely(chartPelatihanInstance);
+        const pLabels = pelatihanList.map(p => `[${p.kode}] ${p.nama}`);
+        const pCounts = pelatihanList.map(p =>
+          filtered.filter(k => Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(p.id)).length
+        );
+        const pColors = pelatihanList.map((_, idx) => PELATIHAN_COLORS[idx % PELATIHAN_COLORS.length]);
+
+        chartPelatihanInstance = new Chart(pelatihanCanvas, {
+          type: 'bar',
+          data: {
+            labels: pLabels,
+            datasets: [
+              {
+                label: 'Kader Peserta',
+                data: pCounts,
+                backgroundColor: pColors,
+                borderRadius: 6,
+                barThickness: 20
+              }
+            ]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => ` Telah diikuti oleh ${ctx.parsed.x} kader`
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
+                grid: { color: '#e6eee9' }
+              },
+              y: {
+                ticks: { color: '#1e293b', font: { size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      // 4. Grafik Batang: Jumlah Kader yang Telah Mengikuti Salah Satu Pelatihan per DPD (Klik Bar -> Rincian Kader)
+      const pelatihanDpdCanvas = document.getElementById('chart-pelatihan-dpd');
+      if (pelatihanDpdCanvas) {
+        chartPelatihanDpdInstance = destroyChartSafely(chartPelatihanDpdInstance);
+        const selectedPltId = document.getElementById('dashboard-select-pelatihan-dpd')?.value || '';
+        const selectedPlt = pelatihanList.find(p => p.id === selectedPltId);
+        const dpdLabels = DPD_LIST.map(d => d.replace('DPD ', ''));
+        const dpdAttendedCounts = DPD_LIST.map(d =>
+          selectedPlt
+            ? filtered.filter(k => k.dpd === d && Array.isArray(k.pelatihan_ids) && k.pelatihan_ids.includes(selectedPlt.id)).length
+            : 0
+        );
+
+        chartPelatihanDpdInstance = new Chart(pelatihanDpdCanvas, {
+          type: 'bar',
+          data: {
+            labels: dpdLabels,
+            datasets: [
+              {
+                label: selectedPlt ? `[${selectedPlt.kode}] ${selectedPlt.nama}` : 'Peserta Pelatihan',
+                data: dpdAttendedCounts,
+                backgroundColor: DPD_COLORS,
+                borderRadius: 8,
+                maxBarThickness: 48
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            onHover: (event, elements, chart) => {
+              const target = event?.native?.target;
+              if (!target || !chart) return;
+              const hits = chart.getElementsAtEventForMode(event, 'index', { intersect: false }, true);
+              target.style.cursor = hits && hits.length > 0 ? 'pointer' : 'default';
+            },
+            onClick: (event, elements, chart) => {
+              if (!chart) return;
+              const hits = (elements && elements.length > 0)
+                ? elements
+                : chart.getElementsAtEventForMode(event, 'index', { intersect: false }, true);
+              if (hits && hits.length > 0) {
+                const barIndex = hits[0].index;
+                const dpdName = DPD_LIST[barIndex];
+                if (dpdName) {
+                  selectPelatihanDpdBar(dpdName);
+                }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: (items) => 'DPD ' + items[0].label,
+                  label: (ctx) => selectedPlt
+                    ? ` Peserta [${selectedPlt.kode}]: ${ctx.parsed.y} kader (klik untuk rincian)`
+                    : ` Peserta: ${ctx.parsed.y} kader`
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } },
+                grid: { color: '#e6eee9' }
+              },
+              x: {
+                ticks: { color: '#334155', font: { size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
     }
 
     // =========================================================================
@@ -2699,6 +3524,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           k.nama_lengkap.toLowerCase().includes(q) ||
           k.id_kader.toLowerCase().includes(q) ||
           k.no_whatsapp.toLowerCase().includes(q) ||
+          (k.nama_kki || '').toLowerCase().includes(q) ||
+          (k.nama_murabbi || '').toLowerCase().includes(q) ||
           k.profesi.toLowerCase().includes(q) ||
           k.dpd.toLowerCase().includes(q) ||
           k.dpc.toLowerCase().includes(q);
@@ -2835,10 +3662,9 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       document.getElementById('detail-alamat').textContent = kader.alamat || '-';
       document.getElementById('detail-wa').textContent = kader.no_whatsapp;
       document.getElementById('detail-wa-link').href = `https://wa.me/${normalizeWhatsApp(kader.no_whatsapp)}`;
+      document.getElementById('detail-kki').textContent = kader.nama_kki || '-';
+      document.getElementById('detail-murabbi').textContent = kader.nama_murabbi || '-';
 
-      // PENGECUALIAN KHUSUS:
-      // Pelatihan yang SUDAH diikuti => hijau terang + ikon centang (✓)
-      // Pelatihan yang BELUM diikuti => polos tanpa warna (putih/netral border abu-abu)
       const attendedIds = Array.isArray(kader.pelatihan_ids) ? kader.pelatihan_ids : [];
       const attendedCount = pelatihanList.filter(p => attendedIds.includes(p.id)).length;
       document.getElementById('detail-pelatihan-summary').textContent =
@@ -2901,6 +3727,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         'Tempat Lahir',
         'Tanggal Lahir',
         'No WhatsApp',
+        'Nama KKI',
+        'Nama Murabbi',
         'DPD Domisili',
         'DPC Domisili',
         'Alamat Domisili',
@@ -2928,6 +3756,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           k.tempat_lahir,
           k.tanggal_lahir,
           k.no_whatsapp,
+          k.nama_kki || '-',
+          k.nama_murabbi || '-',
           k.dpd,
           k.dpc,
           k.alamat,
@@ -2952,6 +3782,336 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       URL.revokeObjectURL(url);
 
       showToast(`Berhasil mengekspor ${data.length} data kader ke CSV.`, 'success');
+    }
+
+    // =========================================================================
+    // 11B. LAMAN 3: HALAQAH (BOX KKI, DETAIL MODAL, EDIT LANGSUNG & JABATAN)
+    // =========================================================================
+    function getKaderByKkiName(namaKki) {
+      const target = String(namaKki || '').trim().toLowerCase();
+      if (!target) return [];
+      return kaderList.filter(k => String(k.nama_kki || '').trim().toLowerCase() === target);
+    }
+
+    function getNaqibNameForKki(kki, members) {
+      const naqibSeq = kki.pengurus && kki.pengurus.naqib_seq != null ? Number(kki.pengurus.naqib_seq) : null;
+      if (naqibSeq === null) return null;
+      const found = (members || []).find(m => Number(m.reg_seq) === naqibSeq);
+      return found ? found.nama_lengkap : null;
+    }
+
+    function renderHalaqahGrid() {
+      const gridEl = document.getElementById('halaqah-grid');
+      const emptyEl = document.getElementById('halaqah-empty-state');
+      if (!gridEl || !emptyEl) return;
+
+      const query = (document.getElementById('search-halaqah')?.value || '').trim().toLowerCase();
+      const filteredKki = kkiList.filter(item => {
+        if (!query) return true;
+        const members = getKaderByKkiName(item.nama_kki);
+        const naqibName = (getNaqibNameForKki(item, members) || '').toLowerCase();
+        return item.nama_kki.toLowerCase().includes(query) ||
+          item.nama_murabbi.toLowerCase().includes(query) ||
+          naqibName.includes(query);
+      });
+
+      if (filteredKki.length === 0) {
+        gridEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      emptyEl.classList.add('hidden');
+
+      gridEl.innerHTML = filteredKki.map((kki, idx) => {
+        const members = getKaderByKkiName(kki.nama_kki);
+        const jumlahMutarabbi = members.length;
+        const namaNaqib = getNaqibNameForKki(kki, members);
+
+        const scheduleInfo = (kki.hari_tarbiyah || kki.jam_tarbiyah)
+          ? `${escapeHtml(kki.hari_tarbiyah || '-')}${kki.jam_tarbiyah ? ' • ' + escapeHtml(kki.jam_tarbiyah) : ''}`
+          : 'Jadwal belum diatur';
+
+        const naqibBlock = namaNaqib
+          ? `<div class="p-3 rounded-xl bg-orange-50/90 border border-orange-200 flex items-center justify-between gap-2">
+               <div class="min-w-0">
+                 <span class="text-[10px] font-extrabold uppercase tracking-wider text-orange-700 block">Nama Naqib</span>
+                 <p class="text-xs sm:text-sm font-bold text-orange-950 mt-0.5 truncate">${escapeHtml(namaNaqib)}</p>
+               </div>
+               <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-500 text-white shrink-0">Naqib</span>
+             </div>`
+          : `<div class="p-3 rounded-xl bg-[#f4f7f5] border border-dashed border-[#cddcd3]">
+               <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#5f8575] block">Nama Naqib</span>
+               <p class="text-xs font-semibold text-slate-400 italic mt-0.5">Belum ditentukan</p>
+             </div>`;
+
+        return `
+          <div class="bg-white rounded-2xl border border-[#d5e0d9] hover:border-[#5f8575] shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+            <div>
+              <!-- Strip Header Box -->
+              <div class="bg-teal-sage-gradient px-5 py-3.5 text-white flex items-center justify-between gap-2">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/20 border border-white/25">KKI #${idx + 1}</span>
+                <span class="text-[11px] font-semibold text-white/90 truncate">${scheduleInfo}</span>
+              </div>
+
+              <!-- Konten Utama Box KKI -->
+              <div class="p-5 space-y-3.5">
+                <div>
+                  <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#5f8575] block">Nama KKI</span>
+                  <h3 class="text-base font-extrabold text-slate-900 mt-0.5 leading-snug">${escapeHtml(kki.nama_kki)}</h3>
+                </div>
+
+                <div class="p-3 rounded-xl bg-[#f4f7f5] border border-[#e6eee9]">
+                  <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#5f8575] block">Nama Murabbi</span>
+                  <p class="text-xs sm:text-sm font-bold text-slate-800 mt-0.5">${escapeHtml(kki.nama_murabbi)}</p>
+                </div>
+
+                ${naqibBlock}
+
+                <div class="flex items-center justify-between pt-1">
+                  <div>
+                    <span class="text-[11px] font-bold text-slate-500 block">Jumlah Mutarabbi</span>
+                    <span class="text-xl font-extrabold text-[#0f766e] tabular-nums">${jumlahMutarabbi} <span class="text-xs font-semibold text-slate-500">Kader</span></span>
+                  </div>
+
+                  <button type="button" onclick="openHalaqahDetailModal('${escapeHtml(kki.id)}')" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-sage-gradient bg-teal-sage-gradient-hover text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>Lihat</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openHalaqahDetailModal(kkiId) {
+      const kki = kkiList.find(item => item.id === kkiId);
+      if (!kki) return;
+
+      activeRolePickerKaderSeq = null;
+      document.getElementById('halaqah-active-kki-id').value = kki.id;
+      document.getElementById('halaqah-modal-title').textContent = kki.nama_kki;
+      document.getElementById('halaqah-modal-murabbi-sub').textContent = `Murabbi: ${kki.nama_murabbi}`;
+
+      document.getElementById('halaqah-info-nama-kki').textContent = kki.nama_kki;
+      document.getElementById('halaqah-info-nama-murabbi').textContent = kki.nama_murabbi;
+
+      document.getElementById('halaqah-edit-tahun').value = kki.tahun_terbentuk || '';
+      document.getElementById('halaqah-edit-hari').value = kki.hari_tarbiyah || '';
+      document.getElementById('halaqah-edit-jam').value = kki.jam_tarbiyah || '';
+
+      const saveInd = document.getElementById('halaqah-save-indicator');
+      if (saveInd) saveInd.textContent = 'Perubahan tersimpan otomatis';
+
+      renderHalaqahKaderList(kki.id);
+      document.getElementById('modal-halaqah-detail').classList.remove('hidden');
+    }
+
+    function closeHalaqahDetailModal() {
+      activeRolePickerKaderSeq = null;
+      document.getElementById('modal-halaqah-detail').classList.add('hidden');
+    }
+
+    function toggleHalaqahRolePicker(regSeq) {
+      const kkiId = document.getElementById('halaqah-active-kki-id')?.value;
+      if (!kkiId) return;
+      activeRolePickerKaderSeq = (Number(activeRolePickerKaderSeq) === Number(regSeq)) ? null : Number(regSeq);
+      renderHalaqahKaderList(kkiId);
+    }
+
+    function renderHalaqahKaderList(kkiId) {
+      const kki = kkiList.find(item => item.id === kkiId);
+      const listEl = document.getElementById('halaqah-kader-list');
+      const countBadge = document.getElementById('halaqah-modal-count-badge');
+      if (!kki || !listEl) return;
+
+      const members = getKaderByKkiName(kki.nama_kki);
+      if (countBadge) countBadge.textContent = `${members.length} Mutarabbi`;
+
+      if (members.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-6 rounded-xl bg-[#f4f7f5] border border-[#d5e0d9] text-center space-y-1">
+            <p class="text-xs sm:text-sm font-bold text-slate-700">Belum ada kader terdaftar pada KKI ini.</p>
+            <p class="text-xs text-slate-500">Pilih "${escapeHtml(kki.nama_kki)}" saat registrasi atau edit data kader di Direktori Kader.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const pengurus = kki.pengurus || {};
+
+      listEl.innerHTML = members.map((k, index) => {
+        const seq = Number(k.reg_seq);
+        let role = null;
+        if (Number(pengurus.naqib_seq) === seq) role = 'Naqib';
+        else if (Number(pengurus.sekretaris_seq) === seq) role = 'Sekretaris';
+        else if (Number(pengurus.bendahara_seq) === seq) role = 'Bendahara';
+
+        let rowStyle = 'bg-white hover:bg-[#f4f7f5] border-[#d5e0d9] text-slate-900';
+        let roleTagHtml = '';
+
+        if (role === 'Naqib') {
+          rowStyle = 'bg-orange-100 hover:bg-orange-100/90 border-orange-400 text-orange-950';
+          roleTagHtml = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-orange-500 text-white shadow-2xs">Naqib</span>`;
+        } else if (role === 'Sekretaris') {
+          rowStyle = 'bg-blue-100 hover:bg-blue-100/90 border-blue-400 text-blue-950';
+          roleTagHtml = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-blue-600 text-white shadow-2xs">Sekretaris</span>`;
+        } else if (role === 'Bendahara') {
+          rowStyle = 'bg-emerald-100 hover:bg-emerald-100/90 border-emerald-400 text-emerald-950';
+          roleTagHtml = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-600 text-white shadow-2xs">Bendahara</span>`;
+        }
+
+        const isPickerOpen = Number(activeRolePickerKaderSeq) === seq;
+        const mMeta = getMarhalahMeta(k.marhalah);
+
+        return `
+          <div class="rounded-xl border transition-all overflow-hidden ${rowStyle}">
+            <!-- Baris Kader (Klik untuk memilih jabatan) -->
+            <button type="button" onclick="toggleHalaqahRolePicker(${seq})" class="w-full px-4 py-3 flex items-center justify-between gap-3 text-left cursor-pointer">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="w-6 h-6 rounded-full bg-black/10 text-xs font-extrabold flex items-center justify-center shrink-0 tabular-nums">${index + 1}</span>
+                <div class="min-w-0">
+                  <div class="font-bold text-sm truncate">${escapeHtml(k.nama_lengkap)}</div>
+                  <div class="text-[11px] opacity-75 flex flex-wrap items-center gap-1.5 mt-0.5">
+                    <span class="font-mono font-semibold">${escapeHtml(k.id_kader)}</span>
+                    <span>•</span>
+                    <span>${escapeHtml(mMeta.label)}</span>
+                    <span>•</span>
+                    <span>${escapeHtml(k.dpd)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                ${roleTagHtml}
+                <span class="text-[11px] font-bold px-2 py-1 rounded-lg bg-white/70 border border-black/10 text-slate-700">
+                  ${isPickerOpen ? 'Tutup' : 'Pilih Jabatan'}
+                </span>
+              </div>
+            </button>
+
+            <!-- Panel Pilihan Jabatan (Muncul saat nama kader diklik) -->
+            ${isPickerOpen ? `
+              <div class="px-4 py-3 bg-white/95 border-t border-black/10 flex flex-wrap items-center justify-between gap-2">
+                <span class="text-[11px] font-bold text-slate-600">Tetapkan jabatan untuk <strong>${escapeHtml(k.nama_lengkap)}</strong>:</span>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <button type="button" onclick="assignHalaqahRole('${escapeHtml(kki.id)}', ${seq}, 'Naqib')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${role === 'Naqib' ? 'bg-orange-600 text-white ring-2 ring-orange-300' : 'bg-orange-100 hover:bg-orange-500 text-orange-900 hover:text-white border border-orange-300'}">
+                    Naqib
+                  </button>
+                  <button type="button" onclick="assignHalaqahRole('${escapeHtml(kki.id)}', ${seq}, 'Sekretaris')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${role === 'Sekretaris' ? 'bg-blue-700 text-white ring-2 ring-blue-300' : 'bg-blue-100 hover:bg-blue-600 text-blue-900 hover:text-white border border-blue-300'}">
+                    Sekretaris
+                  </button>
+                  <button type="button" onclick="assignHalaqahRole('${escapeHtml(kki.id)}', ${seq}, 'Bendahara')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${role === 'Bendahara' ? 'bg-emerald-700 text-white ring-2 ring-emerald-300' : 'bg-emerald-100 hover:bg-emerald-600 text-emerald-900 hover:text-white border border-emerald-300'}">
+                    Bendahara
+                  </button>
+                  ${role ? `
+                    <button type="button" onclick="assignHalaqahRole('${escapeHtml(kki.id)}', ${seq}, 'NONE')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold cursor-pointer">
+                      Hapus Jabatan
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function assignHalaqahRole(kkiId, regSeq, roleName) {
+      const kkiIdx = kkiList.findIndex(item => item.id === kkiId);
+      if (kkiIdx === -1) return;
+
+      const seq = Number(regSeq);
+      const currentKki = normalizeKkiRecord(kkiList[kkiIdx], kkiId);
+      const pengurus = { ...currentKki.pengurus };
+
+      if (Number(pengurus.naqib_seq) === seq) pengurus.naqib_seq = null;
+      if (Number(pengurus.sekretaris_seq) === seq) pengurus.sekretaris_seq = null;
+      if (Number(pengurus.bendahara_seq) === seq) pengurus.bendahara_seq = null;
+
+      if (roleName === 'Naqib') {
+        pengurus.naqib_seq = seq;
+      } else if (roleName === 'Sekretaris') {
+        pengurus.sekretaris_seq = seq;
+      } else if (roleName === 'Bendahara') {
+        pengurus.bendahara_seq = seq;
+      }
+
+      const updatedKki = { ...currentKki, pengurus };
+      const dbRow = {
+        id: updatedKki.id,
+        tipe_data: 'kki',
+        payload: { _entity: 'kki', ...updatedKki },
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        await upsertRowsToSupabaseAndBackup([dbRow]);
+        kkiList[kkiIdx] = updatedKki;
+        saveFallbackToLocalStorage();
+        activeRolePickerKaderSeq = null;
+        renderHalaqahKaderList(kkiId);
+        renderHalaqahGrid();
+
+        const kader = kaderList.find(k => Number(k.reg_seq) === seq);
+        const kaderName = kader ? kader.nama_lengkap : 'Kader';
+        if (roleName === 'NONE') {
+          showToast(`Jabatan pengurus untuk ${kaderName} dihapus.`, 'success');
+        } else {
+          showToast(`${kaderName} ditetapkan sebagai ${roleName}.`, 'success');
+        }
+      } catch (err) {
+        showToast(`Gagal menyimpan jabatan pengurus: ${err.message}`, 'error');
+      }
+    }
+
+    async function saveHalaqahMetaChanges(showFeedbackToast = false) {
+      const kkiId = document.getElementById('halaqah-active-kki-id')?.value;
+      if (!kkiId) return;
+
+      const kkiIdx = kkiList.findIndex(item => item.id === kkiId);
+      if (kkiIdx === -1) return;
+
+      const tahun = document.getElementById('halaqah-edit-tahun').value.trim();
+      const hari = document.getElementById('halaqah-edit-hari').value;
+      const jam = document.getElementById('halaqah-edit-jam').value.trim();
+
+      const currentKki = normalizeKkiRecord(kkiList[kkiIdx], kkiId);
+      const updatedKki = {
+        ...currentKki,
+        tahun_terbentuk: tahun,
+        hari_tarbiyah: hari,
+        jam_tarbiyah: jam
+      };
+
+      const dbRow = {
+        id: updatedKki.id,
+        tipe_data: 'kki',
+        payload: { _entity: 'kki', ...updatedKki },
+        updated_at: new Date().toISOString()
+      };
+
+      const saveInd = document.getElementById('halaqah-save-indicator');
+      if (saveInd) saveInd.textContent = 'Menyimpan...';
+
+      try {
+        await upsertRowsToSupabaseAndBackup([dbRow]);
+        kkiList[kkiIdx] = updatedKki;
+        saveFallbackToLocalStorage();
+        renderHalaqahGrid();
+        if (saveInd) saveInd.textContent = 'Tersimpan ✓';
+        if (showFeedbackToast) {
+          showToast(`Informasi ${updatedKki.nama_kki} berhasil diperbarui.`, 'success');
+        }
+      } catch (err) {
+        if (saveInd) saveInd.textContent = 'Gagal menyimpan';
+        showToast(`Gagal menyimpan informasi halaqah: ${err.message}`, 'error');
+      }
     }
 
     // =========================================================================
@@ -3022,9 +4182,104 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       });
     }
 
+    // Autocomplete Rekomendasi Nama KKI & Nama Murabbi (minimal 3 huruf)
+    function closeAllKkiAutocompletes() {
+      document.getElementById('kki-suggestions')?.classList.add('hidden');
+      document.getElementById('murabbi-suggestions')?.classList.add('hidden');
+    }
+
+    function handleKkiAutocomplete() {
+      const input = document.getElementById('input-nama-kki');
+      const box = document.getElementById('kki-suggestions');
+      if (!input || !box) return;
+
+      const query = input.value.trim().toLowerCase();
+      if (query.length < 3 || kkiList.length === 0) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      const matches = kkiList.filter(item =>
+        item.nama_kki.toLowerCase().includes(query) ||
+        item.nama_murabbi.toLowerCase().includes(query)
+      );
+
+      if (matches.length === 0) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      box.innerHTML = matches.map(item => `
+        <button type="button" onclick="selectKkiSuggestion('${escapeHtml(item.id)}')" class="w-full text-left px-3.5 py-2.5 hover:bg-[#e6eee9] transition-colors cursor-pointer block">
+          <div class="text-xs font-extrabold text-[#0f766e]">${escapeHtml(item.nama_kki)}</div>
+          <div class="text-[11px] text-slate-600 mt-0.5">Murabbi: <strong class="text-slate-800">${escapeHtml(item.nama_murabbi)}</strong></div>
+        </button>
+      `).join('');
+
+      box.classList.remove('hidden');
+    }
+
+    function selectKkiSuggestion(kkiId) {
+      const found = kkiList.find(item => item.id === kkiId);
+      if (!found) return;
+
+      const kkiInput = document.getElementById('input-nama-kki');
+      const murabbiInput = document.getElementById('input-nama-murabbi');
+      if (kkiInput) kkiInput.value = found.nama_kki;
+      if (murabbiInput && !murabbiInput.value.trim()) {
+        murabbiInput.value = found.nama_murabbi;
+      }
+      closeAllKkiAutocompletes();
+    }
+
+    function handleMurabbiAutocomplete() {
+      const input = document.getElementById('input-nama-murabbi');
+      const box = document.getElementById('murabbi-suggestions');
+      if (!input || !box) return;
+
+      const query = input.value.trim().toLowerCase();
+      if (query.length < 3 || kkiList.length === 0) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      const matches = kkiList.filter(item =>
+        item.nama_murabbi.toLowerCase().includes(query) ||
+        item.nama_kki.toLowerCase().includes(query)
+      );
+
+      if (matches.length === 0) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      box.innerHTML = matches.map(item => `
+        <button type="button" onclick="selectMurabbiSuggestion('${escapeHtml(item.id)}')" class="w-full text-left px-3.5 py-2.5 hover:bg-[#e6eee9] transition-colors cursor-pointer block">
+          <div class="text-xs font-extrabold text-slate-900">${escapeHtml(item.nama_murabbi)}</div>
+          <div class="text-[11px] text-[#0f766e] font-semibold mt-0.5">KKI: ${escapeHtml(item.nama_kki)}</div>
+        </button>
+      `).join('');
+
+      box.classList.remove('hidden');
+    }
+
+    function selectMurabbiSuggestion(kkiId) {
+      const found = kkiList.find(item => item.id === kkiId);
+      if (!found) return;
+
+      const kkiInput = document.getElementById('input-nama-kki');
+      const murabbiInput = document.getElementById('input-nama-murabbi');
+      if (murabbiInput) murabbiInput.value = found.nama_murabbi;
+      if (kkiInput && !kkiInput.value.trim()) {
+        kkiInput.value = found.nama_kki;
+      }
+      closeAllKkiAutocompletes();
+    }
+
     function openKaderFormModal(editRegSeq = null) {
       const form = document.getElementById('form-kader');
       form.reset();
+      closeAllKkiAutocompletes();
 
       document.getElementById('wa-duplicate-box').classList.add('hidden');
       document.getElementById('input-wa').classList.remove('border-rose-500');
@@ -3045,6 +4300,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         document.getElementById('input-tempat-lahir').value = kader.tempat_lahir || '';
         document.getElementById('input-tanggal-lahir').value = kader.tanggal_lahir || '';
         document.getElementById('input-wa').value = kader.no_whatsapp;
+        document.getElementById('input-nama-kki').value = kader.nama_kki || '';
+        document.getElementById('input-nama-murabbi').value = kader.nama_murabbi || '';
         document.getElementById('input-dpd').value = kader.dpd;
         document.getElementById('input-dpc').value = kader.dpc || '';
         document.getElementById('input-alamat').value = kader.alamat || '';
@@ -3102,6 +4359,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       const tempatLahir = document.getElementById('input-tempat-lahir').value.trim();
       const tanggalLahir = document.getElementById('input-tanggal-lahir').value;
       const waRaw = document.getElementById('input-wa').value.trim();
+      const namaKki = document.getElementById('input-nama-kki').value.trim();
+      const namaMurabbi = document.getElementById('input-nama-murabbi').value.trim();
       const dpd = document.getElementById('input-dpd').value;
       const dpc = document.getElementById('input-dpc').value.trim();
       const alamat = document.getElementById('input-alamat').value.trim();
@@ -3122,6 +4381,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         tempat_lahir: tempatLahir,
         tanggal_lahir: tanggalLahir,
         no_whatsapp: waRaw,
+        nama_kki: namaKki,
+        nama_murabbi: namaMurabbi,
         dpd: dpd,
         dpc: dpc,
         alamat: alamat,
@@ -3191,6 +4452,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
 
       const sampleKode1 = pelatihanList[0] ? pelatihanList[0].kode : 'DT-01';
       const sampleKode2 = pelatihanList[1] ? `${sampleKode1}, ${pelatihanList[1].kode}` : sampleKode1;
+      const sampleKki = kkiList[0] ? kkiList[0].nama_kki : 'KKI Al-Fatih Mamuju';
+      const sampleMurabbi = kkiList[0] ? kkiList[0].nama_murabbi : 'Ust. H. Muhammad Ridwan, Lc., M.Ag.';
 
       const templateRows = [
         {
@@ -3199,6 +4462,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           'Tempat Lahir': 'Mamuju',
           'Tanggal Lahir': '1991-07-15',
           'No WhatsApp': '081000000001',
+          'Nama KKI': sampleKki,
+          'Nama Murabbi': sampleMurabbi,
           'DPD Domisili': 'DPD Mamuju',
           'DPC Domisili': 'DPC Mamuju',
           'Alamat Domisili': 'Jl. MH Thamrin No. xx',
@@ -3217,6 +4482,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
         { wch: 18 }, // Tempat Lahir
         { wch: 15 }, // Tanggal Lahir
         { wch: 18 }, // No WhatsApp
+        { wch: 28 }, // Nama KKI
+        { wch: 34 }, // Nama Murabbi
         { wch: 22 }, // DPD Domisili
         { wch: 18 }, // DPC Domisili
         { wch: 34 }, // Alamat Domisili
@@ -3227,17 +4494,17 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       ];
       XLSX.utils.book_append_sheet(wb, wsTemplate, 'Template_Kader');
 
-      // Sheet 2: Panduan & Daftar Kode Resmi dari Sistem
       const guideRows = [
         { Kategori: 'DPD Domisili Valid', Nilai_Valid: DPD_LIST.join(' | '), Keterangan: 'Pilih salah satu dari 6 DPD Sulawesi Barat' },
         { Kategori: 'Jenjang Marhalah Valid', Nilai_Valid: MARHALAH_LIST.map(m => `${m.label} (${m.code})`).join(' | '), Keterangan: 'Isi nama marhalah atau kodenya' },
         { Kategori: 'Jenis Kelamin Valid', Nilai_Valid: 'Ikhwan | Akhwat', Keterangan: 'Wajib Ikhwan atau Akhwat' },
         { Kategori: 'Status Kader Valid', Nilai_Valid: 'Aktif | Kurang Aktif', Keterangan: 'Default: Aktif' },
         { Kategori: 'Format Tanggal Lahir', Nilai_Valid: 'YYYY-MM-DD (Contoh: 1994-08-17)', Keterangan: 'Tahun-Bulan-Tanggal' },
+        { Kategori: 'Daftar KKI & Murabbi Master', Nilai_Valid: kkiList.map(k => `${k.nama_kki} (Murabbi: ${k.nama_murabbi})`).join(' | ') || '-', Keterangan: 'Sesuaikan dengan data Master KKI & Murabbi' },
         { Kategori: 'Kode Pelatihan Master', Nilai_Valid: pelatihanList.map(p => `${p.kode} = ${p.nama}`).join(' | ') || '-', Keterangan: 'Pisahkan dengan tanda koma jika lebih dari 1 kode' }
       ];
       const wsGuide = XLSX.utils.json_to_sheet(guideRows);
-      wsGuide['!cols'] = [{ wch: 24 }, { wch: 68 }, { wch: 38 }];
+      wsGuide['!cols'] = [{ wch: 26 }, { wch: 72 }, { wch: 38 }];
       XLSX.utils.book_append_sheet(wb, wsGuide, 'Panduan_Pengisian');
 
       XLSX.writeFile(wb, 'Template_Kader_SIKAD_Sulbar.xlsx');
@@ -3304,7 +4571,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
           const seenWaInFile = new Set();
 
           bulkParsedRows = rawJsonRows.map((row, index) => {
-            const excelRowNum = index + 2; // Header di baris 1
+            const excelRowNum = index + 2;
             const getCol = (...keys) => {
               const rowKeys = Object.keys(row);
               for (const k of keys) {
@@ -3324,6 +4591,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
             })();
             const tanggalLahir = parseExcelDate(tanggalLahirRaw);
             const waRaw = getCol('No WhatsApp', 'No. WhatsApp', 'WhatsApp', 'No WA');
+            let namaKki = getCol('Nama KKI', 'KKI');
+            let namaMurabbi = getCol('Nama Murabbi', 'Murabbi');
             const dpdRaw = getCol('DPD Domisili', 'DPD');
             const dpc = getCol('DPC Domisili', 'DPC') || '-';
             const alamat = getCol('Alamat Domisili', 'Alamat') || '-';
@@ -3331,6 +4600,14 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
             const marhalahRaw = getCol('Jenjang Marhalah', 'Marhalah');
             const statusRaw = getCol('Status Kader', 'Status');
             const kodePltRaw = getCol('Kode Pelatihan Diikuti', 'Kode Pelatihan', 'Pelatihan');
+
+            if (namaKki && !namaMurabbi) {
+              const matchedKki = kkiList.find(item => item.nama_kki.toLowerCase() === namaKki.toLowerCase());
+              if (matchedKki) namaMurabbi = matchedKki.nama_murabbi;
+            } else if (namaMurabbi && !namaKki) {
+              const matchedMurabbi = kkiList.find(item => item.nama_murabbi.toLowerCase() === namaMurabbi.toLowerCase());
+              if (matchedMurabbi) namaKki = matchedMurabbi.nama_kki;
+            }
 
             const errors = [];
 
@@ -3363,7 +4640,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
             const gender = genderRaw.toLowerCase() === 'akhwat' ? 'Akhwat' : 'Ikhwan';
             const status = statusRaw.toLowerCase() === 'kurang aktif' ? 'Kurang Aktif' : 'Aktif';
 
-            // Cocokkan kode pelatihan dari kolom Excel dengan Master Daurah & Pelatihan
             const pelatihanIds = [];
             if (kodePltRaw) {
               const codes = kodePltRaw.split(/[,;]+/).map(c => c.trim().toUpperCase()).filter(Boolean);
@@ -3397,6 +4673,8 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
                 tempat_lahir: tempatLahir || '-',
                 tanggal_lahir: tanggalLahir || '',
                 no_whatsapp: waRaw || '-',
+                nama_kki: namaKki,
+                nama_murabbi: namaMurabbi,
                 dpd: dpd || dpdRaw || '-',
                 dpc,
                 alamat,
@@ -3454,6 +4732,10 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
             <td class="py-2.5 px-3 font-mono text-slate-500">#${item.excelRowNum}</td>
             <td class="py-2.5 px-3 font-mono font-bold text-[#0f766e] whitespace-nowrap">${escapeHtml(k.id_kader)}</td>
             <td class="py-2.5 px-3 font-bold text-slate-900">${escapeHtml(k.nama_lengkap)} <span class="font-normal text-slate-500">(${escapeHtml(k.jenis_kelamin)})</span></td>
+            <td class="py-2.5 px-3 text-slate-700">
+              <div class="font-semibold text-slate-800">${escapeHtml(k.nama_kki || '-')}</div>
+              <div class="text-[11px] text-[#5f8575]">${escapeHtml(k.nama_murabbi || '-')}</div>
+            </td>
             <td class="py-2.5 px-3 text-slate-700">${escapeHtml(k.dpd)} <span class="text-slate-400">/ ${escapeHtml(k.dpc)}</span></td>
             <td class="py-2.5 px-3 whitespace-nowrap">${marhalahPill}</td>
             <td class="py-2.5 px-3 font-mono text-slate-700 whitespace-nowrap">${escapeHtml(k.no_whatsapp)}</td>
@@ -3484,7 +4766,6 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       try {
         await upsertRowsToSupabaseAndBackup(dbRowsToUpsert);
 
-        // Masukkan kader baru ke bagian atas daftar lokal
         for (let i = validRows.length - 1; i >= 0; i--) {
           kaderList.unshift(validRows[i].kaderObj);
         }
@@ -3501,9 +4782,42 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     }
 
     // =========================================================================
-    // 13. LAMAN 3: MASTER DAURAH & PELATIHAN (SEDERHANA: KODE & NAMA SAJA)
+    // 13. LAMAN 4: MASTER DAURAH, PELATIHAN & KKI
     // =========================================================================
+    function switchMasterTab(tabKey) {
+      activeMasterTab = tabKey;
+      const pPanel = document.getElementById('master-panel-pelatihan');
+      const kPanel = document.getElementById('master-panel-kki');
+      const pBtn = document.getElementById('tab-btn-pelatihan');
+      const kBtn = document.getElementById('tab-btn-kki');
+
+      const activeClass = 'px-3.5 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer bg-teal-sage-gradient text-white shadow-2xs';
+      const inactiveClass = 'px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-slate-600 hover:text-slate-900';
+
+      if (tabKey === 'kki') {
+        pPanel?.classList.add('hidden');
+        kPanel?.classList.remove('hidden');
+        if (pBtn) pBtn.className = inactiveClass;
+        if (kBtn) kBtn.className = activeClass;
+        renderMasterKkiTable();
+      } else {
+        kPanel?.classList.add('hidden');
+        pPanel?.classList.remove('hidden');
+        if (kBtn) kBtn.className = inactiveClass;
+        if (pBtn) pBtn.className = activeClass;
+        renderMasterTable();
+      }
+    }
+
+    function updateMasterTabCounters() {
+      const pTabCount = document.getElementById('tab-count-pelatihan');
+      const kTabCount = document.getElementById('tab-count-kki');
+      if (pTabCount) pTabCount.textContent = pelatihanList.length;
+      if (kTabCount) kTabCount.textContent = kkiList.length;
+    }
+
     function renderMasterTable() {
+      updateMasterTabCounters();
       const badgeEl = document.getElementById('master-total-badge');
       const tbody = document.getElementById('master-tbody');
       if (badgeEl) badgeEl.textContent = pelatihanList.length;
@@ -3625,6 +4939,182 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
       `;
     }
 
+    // --- MASTER KKI & MURABBI ---
+    function renderMasterKkiTable() {
+      updateMasterTabCounters();
+      const badgeEl = document.getElementById('master-kki-total-badge');
+      const tbody = document.getElementById('master-kki-tbody');
+      if (badgeEl) badgeEl.textContent = kkiList.length;
+      if (!tbody) return;
+
+      if (kkiList.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-10 px-4 text-center text-xs sm:text-sm text-slate-500">
+              Belum ada data KKI & Murabbi terdaftar. Tambahkan melalui formulir di samping.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = kkiList.map((item, idx) => {
+        const memberCount = getKaderByKkiName(item.nama_kki).length;
+
+        return `
+          <tr class="hover:bg-[#f4f7f5]/90 transition-colors">
+            <td class="py-3.5 px-4 font-mono text-xs font-bold text-slate-500">${idx + 1}</td>
+            <td class="py-3.5 px-4">
+              <span class="font-bold text-[#0f766e]">${escapeHtml(item.nama_kki)}</span>
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="font-semibold text-slate-800">${escapeHtml(item.nama_murabbi)}</span>
+            </td>
+            <td class="py-3.5 px-4 text-center whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#e6eee9] text-[#0f766e] border border-[#c5d7cd] text-xs font-extrabold tabular-nums">
+                ${memberCount} Kader
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <button type="button" onclick="editMasterKkiItem('${escapeHtml(item.id)}')" class="px-2.5 py-1.5 rounded-lg bg-[#e6eee9] hover:bg-[#5f8575] text-[#2f5245] hover:text-white border border-[#c5d7cd] text-xs font-bold transition-colors cursor-pointer">
+                  Edit
+                </button>
+                <button type="button" onclick="confirmDeleteMasterKkiItem('${escapeHtml(item.id)}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-xs font-bold transition-colors cursor-pointer">
+                  Hapus
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function handleMasterKkiSubmit(event) {
+      event.preventDefault();
+      const editId = document.getElementById('master-kki-edit-id').value;
+      const namaKki = document.getElementById('master-kki-nama').value.trim();
+      const namaMurabbi = document.getElementById('master-kki-murabbi').value.trim();
+
+      if (!namaKki || !namaMurabbi) return;
+
+      const duplicateKki = kkiList.find(item =>
+        item.nama_kki.toLowerCase() === namaKki.toLowerCase() && item.id !== editId
+      );
+      if (duplicateKki) {
+        showToast(`Nama KKI "${namaKki}" sudah terdaftar dengan Murabbi "${duplicateKki.nama_murabbi}".`, 'error');
+        document.getElementById('master-kki-nama').focus();
+        return;
+      }
+
+      const existingKki = editId ? kkiList.find(item => item.id === editId) : null;
+      const targetId = editId || ('KKI-' + Date.now().toString(36).toUpperCase());
+      const kkiObj = normalizeKkiRecord({
+        ...(existingKki || {}),
+        id: targetId,
+        nama_kki: namaKki,
+        nama_murabbi: namaMurabbi
+      }, targetId);
+
+      const nowIso = new Date().toISOString();
+      const rowsToUpsert = [{
+        id: targetId,
+        tipe_data: 'kki',
+        payload: { _entity: 'kki', ...kkiObj },
+        updated_at: nowIso
+      }];
+
+      let updatedKaderList = kaderList;
+      if (existingKki && existingKki.nama_kki.toLowerCase() !== namaKki.toLowerCase()) {
+        const oldNameLower = existingKki.nama_kki.trim().toLowerCase();
+        updatedKaderList = kaderList.map(k => {
+          if (String(k.nama_kki || '').trim().toLowerCase() !== oldNameLower) return k;
+          const updatedK = { ...k, nama_kki: namaKki };
+          rowsToUpsert.push({
+            id: makeKaderDbId(updatedK.reg_seq),
+            tipe_data: 'kader',
+            payload: updatedK,
+            updated_at: nowIso
+          });
+          return updatedK;
+        });
+      }
+
+      try {
+        await upsertRowsToSupabaseAndBackup(rowsToUpsert);
+
+        if (editId) {
+          const idx = kkiList.findIndex(item => item.id === editId);
+          if (idx !== -1) kkiList[idx] = kkiObj;
+          kaderList = updatedKaderList;
+          showToast(`Data "${namaKki}" berhasil diperbarui.`, 'success');
+        } else {
+          kkiList.push(kkiObj);
+          showToast(`"${namaKki}" (Murabbi: ${namaMurabbi}) ditambahkan ke Master KKI.`, 'success');
+        }
+
+        saveFallbackToLocalStorage();
+        resetMasterKkiForm();
+        refreshAllViews();
+      } catch (err) {
+        showToast(`Gagal menyimpan data KKI: ${err.message}`, 'error');
+      }
+    }
+
+    function editMasterKkiItem(id) {
+      const item = kkiList.find(k => k.id === id);
+      if (!item) return;
+
+      document.getElementById('master-kki-edit-id').value = item.id;
+      document.getElementById('master-kki-nama').value = item.nama_kki;
+      document.getElementById('master-kki-murabbi').value = item.nama_murabbi;
+
+      document.getElementById('master-kki-form-heading').textContent = 'Edit Data KKI & Murabbi';
+      document.getElementById('btn-cancel-kki-edit').classList.remove('hidden');
+      document.getElementById('btn-submit-kki').innerHTML = `<span>Simpan Perubahan KKI</span>`;
+      document.getElementById('master-kki-nama').focus();
+    }
+
+    function resetMasterKkiForm() {
+      document.getElementById('form-master-kki').reset();
+      document.getElementById('master-kki-edit-id').value = '';
+      document.getElementById('master-kki-form-heading').textContent = 'Tambah KKI Baru';
+      document.getElementById('btn-cancel-kki-edit').classList.add('hidden');
+      document.getElementById('btn-submit-kki').innerHTML = `
+        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Simpan Data KKI</span>
+      `;
+    }
+
+    function confirmDeleteMasterKkiItem(id) {
+      const item = kkiList.find(k => k.id === id);
+      if (!item) return;
+
+      openConfirmModal({
+        title: 'Hapus Data KKI & Murabbi',
+        message: `Apakah Anda yakin ingin menghapus "${item.nama_kki}" (Murabbi: ${item.nama_murabbi}) dari daftar Master KKI?`,
+        confirmText: 'Ya, Hapus KKI',
+        onConfirm: async () => {
+          try {
+            await deleteRowFromSupabaseAndBackup(id);
+            kkiList = kkiList.filter(k => k.id !== id);
+            saveFallbackToLocalStorage();
+
+            if (document.getElementById('master-kki-edit-id').value === id) {
+              resetMasterKkiForm();
+            }
+
+            refreshAllViews();
+            showToast(`Data "${item.nama_kki}" berhasil dihapus dari Master.`, 'success');
+          } catch (err) {
+            showToast(`Gagal menghapus data KKI: ${err.message}`, 'error');
+          }
+        }
+      });
+    }
+
     // =========================================================================
     // 14. MODAL KONFIRMASI CUSTOM (HAPUS KADER, HAPUS MASTER, RESET DATA)
     // =========================================================================
@@ -3723,7 +5213,7 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     function confirmResetSampleData() {
       openConfirmModal({
         title: 'Reset Data Contoh SIKAD',
-        message: 'Seluruh data akan dikembalikan ke 18 data contoh kader se-6 DPD Sulawesi Barat dan 6 data master daurah/pelatihan awal. Lanjutkan?',
+        message: 'Seluruh data akan dikembalikan ke 18 data contoh kader se-6 DPD Sulawesi Barat, 6 data master daurah/pelatihan, dan 6 data master KKI & Murabbi awal. Lanjutkan?',
         confirmText: 'Ya, Reset Data',
         onConfirm: async () => {
           try {
@@ -3732,8 +5222,9 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
             await upsertRowsToSupabaseAndBackup(sampleRows);
             resetDirektoriFilter();
             resetMasterForm();
+            resetMasterKkiForm();
             refreshAllViews();
-            showToast('Database dipulihkan ke 18 kader contoh & 6 master pelatihan.', 'success');
+            showToast('Database dipulihkan ke data contoh SIKAD awal.', 'success');
           } catch (err) {
             showToast(`Gagal mereset data contoh: ${err.message}`, 'error');
           }
@@ -3744,6 +5235,23 @@ CREATE POLICY "Akses Publik SIKAD" ON public.data_utama
     // =========================================================================
     // 15. INISIALISASI SAAT APLIKASI DIBUKA
     // =========================================================================
+    document.addEventListener('click', (event) => {
+      const dpdWrap = document.getElementById('dashboard-dpd-dropdown');
+      const mrhWrap = document.getElementById('dashboard-marhalah-dropdown');
+      if (dpdWrap && !dpdWrap.contains(event.target) && mrhWrap && !mrhWrap.contains(event.target)) {
+        closeAllDashboardDropdowns();
+      }
+
+      const kkiWrap = document.getElementById('kki-autocomplete-wrapper');
+      const murabbiWrap = document.getElementById('murabbi-autocomplete-wrapper');
+      if (kkiWrap && !kkiWrap.contains(event.target)) {
+        document.getElementById('kki-suggestions')?.classList.add('hidden');
+      }
+      if (murabbiWrap && !murabbiWrap.contains(event.target)) {
+        document.getElementById('murabbi-suggestions')?.classList.add('hidden');
+      }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       refreshGithubBackupIndicator();
       setInterval(() => refreshGithubBackupIndicator(), 30000);
